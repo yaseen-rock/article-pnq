@@ -17,11 +17,11 @@ import { DataGrid } from '@mui/x-data-grid'
 import ClearIcon from '@mui/icons-material/Clear'
 import Button from '@mui/material/Button' // Import Button
 import Checkbox from '@mui/material/Checkbox'
-import CheckBoxOutlineBlankIcon from '@mui/icons-material/CheckBoxOutlineBlank'
-import CheckBoxIcon from '@mui/icons-material/CheckBox'
+
+import ToolbarComponent from './toolbar/ToolbarComponent'
+import ArticleFullScreenDialog from './popup/ArticlePopup'
 
 // ** MUI-X DatePicker
-
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
 import { DatePicker } from '@mui/x-date-pickers/DatePicker'
@@ -243,9 +243,19 @@ const TableSelection = () => {
     setSelectedDuration(30)
   }
 
+  const [selectedArticle, setSelectedArticle] = useState(null)
+  const [isPopupOpen, setPopupOpen] = useState(false)
+
+  const handleRowClick = params => {
+    setSelectedArticle(params.row)
+    setPopupOpen(true)
+  }
+
   return (
     <Card>
       <CardHeader title='Article Selection' />
+      {/* Top Toolbar */}
+      <ToolbarComponent />
       {/* Toolbar with Date Filter */}
       <Toolbar>
         <Typography variant='h6' sx={{ flex: '1' }}>
@@ -347,6 +357,7 @@ const TableSelection = () => {
             pageSizeOptions={[5, 10, 50]}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
+            onRowClick={params => handleRowClick(params)}
             hideFooterPagination
           />
         </Box>
@@ -360,9 +371,16 @@ const TableSelection = () => {
             pageSizeOptions={[5, 10, 50]}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
+            onRowClick={params => handleRowClick(params)}
           />
         </Box>
       </Box>
+      {/* Popup Window */}
+      <ArticleFullScreenDialog
+        open={isPopupOpen}
+        handleClose={() => setPopupOpen(false)}
+        article={selectedArticle}
+      />{' '}
     </Card>
   )
 }
