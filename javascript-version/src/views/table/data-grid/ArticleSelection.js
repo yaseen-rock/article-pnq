@@ -19,7 +19,8 @@ import Button from '@mui/material/Button' // Import Button
 import Checkbox from '@mui/material/Checkbox'
 
 import ToolbarComponent from './toolbar/ToolbarComponent'
-import ArticleFullScreenDialog from './popup/ArticlePopup'
+import ArticleFullScreenDialog from './dialog/ArticleDialog'
+import EditDialog from './dialog/EditDialog'
 
 // ** MUI-X DatePicker
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
@@ -33,6 +34,7 @@ import EmailIcon from '@mui/icons-material/Email'
 import ImageIcon from '@mui/icons-material/Image'
 import DownloadIcon from '@mui/icons-material/Download'
 import RssFeedIcon from '@mui/icons-material/RssFeed'
+import EditIcon from '@mui/icons-material/Edit'
 
 // ** Article Database
 import { articles } from './Db-Articles'
@@ -89,43 +91,60 @@ const renderArticle = params => {
   )
 }
 
-const columns = [
-  {
-    flex: 0.1,
-    minWidth: 40,
-    headerName: 'Select',
-    field: 'select',
-
-    renderCell: params => (
-      <Checkbox
-        checked={params.row.isSelected}
-        onChange={() => params.api.selectRow(params.row.id, !params.row.isSelected, false)}
-      />
-    )
-  },
-  {
-    flex: 0.25,
-    minWidth: 290,
-    field: 'article',
-    headerName: 'Article',
-    renderCell: renderArticle
-  },
-  {
-    flex: 0.175,
-    type: 'date',
-    minWidth: 120,
-    headerName: 'Issue Date',
-    field: 'date',
-    valueGetter: params => new Date(params.value),
-    renderCell: params => (
-      <Typography variant='body2' sx={{ color: 'text.primary' }}>
-        {params.row.date}
-      </Typography>
-    )
-  }
-]
-
 const TableSelection = () => {
+  const columns = [
+    {
+      flex: 0.1,
+      minWidth: 5,
+      headerName: 'Select',
+      field: 'select',
+
+      renderCell: params => (
+        <Checkbox
+          checked={params.row.isSelected}
+          onChange={() => params.api.selectRow(params.row.id, !params.row.isSelected, false)}
+          onClick={e => e.stopPropagation()} // Stop propagation to prevent opening the dialog
+        />
+      )
+    },
+    {
+      flex: 0.25,
+      minWidth: 240,
+      field: 'article',
+      headerName: 'Article',
+      renderCell: renderArticle
+    },
+    {
+      flex: 0.175,
+      type: 'date',
+      minWidth: 30,
+      headerName: 'Issue Date',
+      field: 'date',
+      valueGetter: params => new Date(params.value),
+      renderCell: params => (
+        <Typography variant='body2' sx={{ color: 'text.primary' }}>
+          {params.row.date}
+        </Typography>
+      )
+    },
+    {
+      flex: 0.1,
+      minWidth: 5,
+      field: 'edit',
+      headerName: 'Edit',
+      renderCell: params => (
+        <IconButton
+          onClick={e => {
+            e.stopPropagation()
+            handleEdit(params.row)
+          }}
+        >
+          <EditIcon />
+        </IconButton>
+      )
+    }
+  ]
+
   // ** State
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
@@ -134,6 +153,17 @@ const TableSelection = () => {
   const [searchQuery, setSearchQuery] = useState('')
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false)
   const [selectedDuration, setSelectedDuration] = useState(null)
+  const [isEditDialogOpen, setEditDialogOpen] = useState(false)
+
+  const handleEdit = row => {
+    setSelectedArticle(row)
+    setEditDialogOpen(true)
+  }
+
+  const handleSaveChanges = editedArticle => {
+    // Add logic to save changes to the article
+    console.log('Saving changes:', editedArticle)
+  }
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -381,6 +411,13 @@ const TableSelection = () => {
         handleClose={() => setPopupOpen(false)}
         article={selectedArticle}
       />{' '}
+      {/* Edit Dialog */}
+      <EditDialog
+        open={isEditDialogOpen}
+        handleClose={() => setEditDialogOpen(false)}
+        article={selectedArticle}
+        handleSave={handleSaveChanges}
+      />
     </Card>
   )
 }
