@@ -7,8 +7,6 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 
-//import { aR } from '@fullcalendar/core/internal-common'
-
 const EditDialog = ({ open, handleClose, article, handleSave }) => {
   const [editedArticle, setEditedArticle] = useState({
     article: '',

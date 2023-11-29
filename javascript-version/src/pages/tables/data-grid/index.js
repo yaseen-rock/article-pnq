@@ -18,6 +18,7 @@ import TableBasicSort from 'src/views/table/data-grid/TableBasicSort'
 import TableSelection from 'src/views/table/data-grid/TableSelection'
 import TableServerSide from 'src/views/table/data-grid/TableServerSide'
 import ArticleSelection from 'src/views/table/data-grid/ArticleSelection'
+import CardSelection from 'src/views/table/data-grid/CardSelection'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -65,6 +66,10 @@ const DataGrid = () => {
 
       <Grid item xs={12}>
         <ArticleSelection />
+      </Grid>
+
+      <Grid item xs={12}>
+        <CardSelection />
       </Grid>
     </Grid>
   )
