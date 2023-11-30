@@ -6,67 +6,22 @@ import Box from '@mui/material/Box'
 import Card from '@mui/material/Card'
 import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
-import Toolbar from '@mui/material/Toolbar'
 import IconButton from '@mui/material/IconButton'
-import DateRangeIcon from '@mui/icons-material/DateRange'
-import Popover from '@mui/material/Popover'
-import Stack from '@mui/material/Stack'
-import Divider from '@mui/material/Divider'
-import TextField from '@mui/material/TextField'
 import { DataGrid } from '@mui/x-data-grid'
-import ClearIcon from '@mui/icons-material/Clear'
-import Button from '@mui/material/Button' // Import Button
 import Checkbox from '@mui/material/Checkbox'
 
 import ToolbarComponent from './toolbar/ToolbarComponent'
 import ArticleFullScreenDialog from './dialog/ArticleDialog'
 import EditDialog from './dialog/EditDialog'
-
-// ** MUI-X DatePicker
-import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs'
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider'
-import { DatePicker } from '@mui/x-date-pickers/DatePicker'
+import ArticleListToolbar from './toolbar/ArticleListToolbar'
 
 // ** MUI icons
-import SearchIcon from '@mui/icons-material/Search'
-import DeleteIcon from '@mui/icons-material/Delete'
-import EmailIcon from '@mui/icons-material/Email'
-import ImageIcon from '@mui/icons-material/Image'
-import DownloadIcon from '@mui/icons-material/Download'
-import RssFeedIcon from '@mui/icons-material/RssFeed'
 import EditIcon from '@mui/icons-material/Edit'
 
 // ** Article Database
 import { articles } from './Db-Articles'
 
-import SvgIcon from '@mui/material/SvgIcon'
-
-// 1D Icon
-const OneDIcon = props => (
-  <SvgIcon {...props}>
-    <text x='50%' y='50%' fill='#7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
-      1D
-    </text>
-  </SvgIcon>
-)
-
-// 2D Icon
-const TwoDIcon = props => (
-  <SvgIcon {...props}>
-    <text x='50%' y='50%' fill='#7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
-      7D
-    </text>
-  </SvgIcon>
-)
-
-// 3D Icon
-const ThreeDIcon = props => (
-  <SvgIcon {...props}>
-    <text x='50%' y='50%' fill=' #7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
-      1M
-    </text>
-  </SvgIcon>
-)
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 // ** Renders article column
 const renderArticle = params => {
@@ -144,6 +99,7 @@ const TableSelection = () => {
       )
     }
   ]
+  const isNotResponsive = useMediaQuery('(min-width: 1000px )')
 
   // ** State
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 })
@@ -287,123 +243,68 @@ const TableSelection = () => {
       {/* Top Toolbar */}
       <ToolbarComponent />
       {/* Toolbar with Date Filter */}
-      <Toolbar>
-        <Typography variant='h6' sx={{ flex: '1' }}>
-          Article List
-        </Typography>
-        {/* Search Bar */}
-        {isSearchBarVisible && (
-          <TextField
-            label='Search Articles'
-            variant='outlined'
-            size='small'
-            value={searchQuery}
-            onChange={e => setSearchQuery(e.target.value)}
+      <ArticleListToolbar
+        setSearchQuery={setSearchQuery}
+        isSearchBarVisible={isSearchBarVisible}
+        toggleSearchBarVisibility={toggleSearchBarVisibility}
+        handleDelete={handleDelete}
+        handleEmail={handleEmail}
+        handleImage={handleImage}
+        handleDownload={handleDownload}
+        handleRssFeed={handleRssFeed}
+        openFilterPopover={openFilterPopover}
+        handleFilter1D={handleFilter1D}
+        handleFilter7D={handleFilter7D}
+        handleFilter1M={handleFilter1M}
+        filterPopoverAnchor={filterPopoverAnchor}
+        closeFilterPopover={closeFilterPopover}
+        selectedStartDate={selectedStartDate}
+        setSelectedStartDate={setSelectedStartDate}
+        selectedEndDate={selectedEndDate}
+        setSelectedEndDate={setSelectedEndDate}
+      />
+      {/* DataGrid */}
+      <Box p={2}>
+        {isNotResponsive ? (
+          <Box display='flex'>
+            {/* Left Column */}
+            <Box flex='1' p={2} pr={1}>
+              <DataGrid
+                autoHeight
+                rows={leftArticles}
+                columns={columns}
+                pageSizeOptions={[5, 10, 50]}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                onRowClick={params => handleRowClick(params)}
+                hideFooterPagination
+              />
+            </Box>
+
+            {/* Right Column */}
+            <Box flex='1' p={2} pl={1}>
+              <DataGrid
+                autoHeight
+                rows={rightArticles}
+                columns={columns}
+                pageSizeOptions={[5, 10, 50]}
+                paginationModel={paginationModel}
+                onPaginationModelChange={setPaginationModel}
+                onRowClick={params => handleRowClick(params)}
+              />
+            </Box>
+          </Box>
+        ) : (
+          <DataGrid // Single Column for responsive view
+            autoHeight
+            rows={filteredArticles}
+            columns={columns}
+            pageSizeOptions={[5, 10, 50]}
+            paginationModel={paginationModel}
+            onPaginationModelChange={setPaginationModel}
+            onRowClick={params => handleRowClick(params)}
           />
         )}
-        <IconButton onClick={toggleSearchBarVisibility} sx={{ color: '#7367F0', mr: 1 }}>
-          <SearchIcon />
-        </IconButton>
-        <IconButton onClick={handleDelete} sx={{ color: '#7367F0' }}>
-          <DeleteIcon />
-        </IconButton>
-        <IconButton onClick={handleEmail} sx={{ color: '#7367F0' }}>
-          <EmailIcon />
-        </IconButton>
-        <IconButton onClick={handleImage} sx={{ color: '#7367F0' }}>
-          <ImageIcon />
-        </IconButton>
-        <IconButton onClick={handleDownload} sx={{ color: '#7367F0' }}>
-          <DownloadIcon />
-        </IconButton>
-        <IconButton onClick={handleRssFeed} sx={{ color: '#7367F0' }}>
-          <RssFeedIcon />
-        </IconButton>
-        <IconButton onClick={openFilterPopover} sx={{ color: '#7367F0' }}>
-          <DateRangeIcon />
-        </IconButton>
-        {/* Custom Icons for Filtering */}
-        <IconButton onClick={handleFilter1D}>
-          <OneDIcon />
-        </IconButton>
-        <IconButton onClick={handleFilter7D}>
-          <TwoDIcon />
-        </IconButton>
-        <IconButton onClick={handleFilter1M}>
-          <ThreeDIcon />
-        </IconButton>
-      </Toolbar>
-      {/* Date Filter Popover */}
-      <Popover
-        open={Boolean(filterPopoverAnchor)}
-        anchorEl={filterPopoverAnchor}
-        onClose={closeFilterPopover}
-        anchorOrigin={{
-          vertical: 'bottom',
-          horizontal: 'right'
-        }}
-      >
-        <Stack spacing={2} p={2} sx={{ minWidth: '200px', minHeight: '200px' }}>
-          <Typography variant='subtitle2'>Filter by Date Range</Typography>
-          <Divider />
-          {/* Use mui-x DatePicker */}
-          <LocalizationProvider dateAdapter={AdapterDayjs}>
-            <Box display='flex' alignItems='center'>
-              <DatePicker label='Start Date' value={selectedStartDate} onChange={date => setSelectedStartDate(date)} />
-              {selectedStartDate && (
-                <IconButton onClick={() => setSelectedStartDate(null)}>
-                  <ClearIcon />
-                </IconButton>
-              )}
-            </Box>
-            <Box display='flex' alignItems='center'>
-              <DatePicker label='End Date' value={selectedEndDate} onChange={date => setSelectedEndDate(date)} />
-              {selectedEndDate && (
-                <IconButton onClick={() => setSelectedEndDate(null)}>
-                  <ClearIcon />
-                </IconButton>
-              )}
-            </Box>
-          </LocalizationProvider>
-          {/* Clear both dates at the same time */}
-          <Button
-            onClick={() => {
-              setSelectedStartDate(null)
-              setSelectedEndDate(null)
-            }}
-          >
-            Clear
-          </Button>
-        </Stack>
-      </Popover>
-      {/* DataGrid */}
-      <Box display='flex'>
-        {/* Left Column */}
-        <Box flex='1' p={2} pr={1}>
-          <DataGrid
-            autoHeight
-            rows={leftArticles}
-            columns={columns}
-            pageSizeOptions={[5, 10, 50]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            onRowClick={params => handleRowClick(params)}
-            hideFooterPagination
-          />
-        </Box>
-
-        {/* Right Column */}
-        <Box flex='1' p={2} pl={1}>
-          <DataGrid
-            autoHeight
-            rows={rightArticles}
-            columns={columns}
-            pageSizeOptions={[5, 10, 50]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            onRowClick={params => handleRowClick(params)}
-          />
-        </Box>
       </Box>
       {/* Popup Window */}
       <ArticleFullScreenDialog
