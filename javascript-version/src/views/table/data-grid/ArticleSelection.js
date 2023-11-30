@@ -100,6 +100,8 @@ const TableSelection = () => {
     }
   ]
   const isNotResponsive = useMediaQuery('(min-width: 1000px )')
+  const isMobileView = useMediaQuery('(max-width: 530px)')
+  const isNarrowMobileView = useMediaQuery('(max-width: 405px)')
 
   // ** State
   const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 })
@@ -267,22 +269,24 @@ const TableSelection = () => {
       <Box p={2}>
         {isNotResponsive ? (
           <Box display='flex'>
-            {/* Left Column */}
-            <Box flex='1' p={2} pr={1}>
-              <DataGrid
-                autoHeight
-                rows={leftArticles}
-                columns={columns}
-                pageSizeOptions={[5, 10, 50]}
-                paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
-                onRowClick={params => handleRowClick(params)}
-                hideFooterPagination
-              />
-            </Box>
+            {isMobileView ? null : (
+              // Left Column
+              <Box flex='1' p={2} pr={1}>
+                <DataGrid
+                  autoHeight
+                  rows={leftArticles}
+                  columns={columns}
+                  pageSizeOptions={[5, 10, 50]}
+                  paginationModel={paginationModel}
+                  onPaginationModelChange={setPaginationModel}
+                  onRowClick={params => handleRowClick(params)}
+                  hideFooterPagination
+                />
+              </Box>
+            )}
 
             {/* Right Column */}
-            <Box flex='1' p={2} pl={1}>
+            <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
               <DataGrid
                 autoHeight
                 rows={rightArticles}
@@ -295,14 +299,26 @@ const TableSelection = () => {
             </Box>
           </Box>
         ) : (
-          <DataGrid // Single Column for responsive view
+          <DataGrid
             autoHeight
             rows={filteredArticles}
-            columns={columns}
+            columns={columns.filter(column => {
+              // Check if it's mobile view and exclude only the "Select" and "Edit" columns
+              if (isMobileView) {
+                return (
+                  column.field !== 'select' &&
+                  column.field !== 'edit' &&
+                  !(column.field === 'date' && isNarrowMobileView)
+                )
+              }
+
+              return true
+            })}
             pageSizeOptions={[5, 10, 50]}
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             onRowClick={params => handleRowClick(params)}
+            hideFooterPagination
           />
         )}
       </Box>
