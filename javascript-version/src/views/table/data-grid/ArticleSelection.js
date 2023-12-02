@@ -270,7 +270,6 @@ const TableSelection = () => {
         {isNotResponsive ? (
           <Box display='flex'>
             {isMobileView ? null : (
-              // Left Column
               <Box flex='1' p={2} pr={1}>
                 <DataGrid
                   autoHeight
@@ -318,7 +317,6 @@ const TableSelection = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             onRowClick={params => handleRowClick(params)}
-            hideFooterPagination
           />
         )}
       </Box>
