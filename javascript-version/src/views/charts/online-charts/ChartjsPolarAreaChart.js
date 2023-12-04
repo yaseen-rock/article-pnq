@@ -11,7 +11,10 @@ import OptionsMenu from 'src/@core/components/option-menu'
 
 const ChartjsPolarAreaChart = props => {
   // ** Props
-  const { info, grey, green, yellow, primary, warning, legendColor, shareOfVoiceData } = props
+  const { shareOfVoiceData, primary, yellow, warning, info, grey, green, legendColor } = props
+
+  // Define an array of colors
+  const additionalColors = ['#ff5050', '#3399ff', '#ff6600', '#33cc33', '#9933ff', '#ffcc00']
 
   const options = {
     responsive: true,
@@ -52,14 +55,17 @@ const ChartjsPolarAreaChart = props => {
     }
   }
 
+  // Use the primary and additional colors
+  const backgroundColors = [primary, yellow, warning, info, grey, green, ...additionalColors]
+
   const data = {
     labels: shareOfVoiceData.map(entry => entry.company),
     datasets: [
       {
         borderWidth: 0,
         label: 'Share of Voice',
-        data: shareOfVoiceData.map(entry => entry.shareOfVoice),
-        backgroundColor: [primary, yellow, warning, info, grey, green]
+        data: shareOfVoiceData.map((entry, index) => entry.shareOfVoice),
+        backgroundColor: backgroundColors.slice(0, shareOfVoiceData.length)
       }
     ]
   }

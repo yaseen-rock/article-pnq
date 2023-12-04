@@ -1,6 +1,5 @@
 // ** JWT import
 import jwt from 'jsonwebtoken'
-import axios from 'axios' // Add axios for making HTTP requests
 
 // ** Mock Adapter
 import mock from 'src/@fake-db/mock'
@@ -8,99 +7,95 @@ import mock from 'src/@fake-db/mock'
 // ** Default AuthConfig
 import defaultAuthConfig from 'src/configs/auth'
 
+const users = [
+  {
+    id: 1,
+    role: 'admin',
+    password: 'admin',
+    fullName: 'John Doe',
+    username: 'johndoe',
+    email: 'admin@vuexy.com'
+  },
+  {
+    id: 2,
+    role: 'client',
+    password: 'client',
+    fullName: 'Jane Doe',
+    username: 'janedoe',
+    email: 'client@vuexy.com'
+  }
+]
+
 // ! These two secrets should be in .env file and not in any other file
 const jwtConfig = {
   secret: process.env.NEXT_PUBLIC_JWT_SECRET,
   expirationTime: process.env.NEXT_PUBLIC_JWT_EXPIRATION,
   refreshTokenSecret: process.env.NEXT_PUBLIC_JWT_REFRESH_TOKEN_SECRET
 }
+mock.onPost('/jwt/login').reply(request => {
+  const { email, password } = JSON.parse(request.data)
 
-// Authentication API base URL
-const BASE_URL = 'http://51.68.220.77:8001'
-const authEndpoint = '/authenticate'
+  let error = {
+    email: ['Something went wrong']
+  }
+  const user = users.find(u => u.email === email && u.password === password)
+  if (user) {
+    const accessToken = jwt.sign({ id: user.id }, jwtConfig.secret, { expiresIn: jwtConfig.expirationTime })
 
-mock.onPost('/jwt/login').reply(async request => {
-  const { loginname, password } = JSON.parse(request.data)
-
-  try {
-    // Make a request to the authentication API
-    const responseAuth = await axios.post(`${BASE_URL}${authEndpoint}`, {
-      loginname,
-      password
-    })
-
-    // Extract relevant data from the API response
-    const { access_token, token_type, full_name, role, email } = responseAuth.data
-
-    // Create a JWT token using the received access token
-    const accessToken = jwt.sign({ email, role }, jwtConfig.secret, { expiresIn: jwtConfig.expirationTime })
-
-    // Construct the response object
     const response = {
       accessToken,
-      userData: {
-        full_name,
-        role,
-        email
-      }
+      userData: { ...user, password: undefined }
     }
 
     return [200, response]
-  } catch (error) {
-    // Handle authentication failure
-    const errorMessage = error.response?.data?.message || 'Something went wrong'
-
-    const response = {
-      error: {
-        email: [errorMessage]
-      }
+  } else {
+    error = {
+      email: ['email or Password is Invalid']
     }
 
-    return [400, { error: response }]
+    return [400, { error }]
   }
 })
+mock.onPost('/jwt/register').reply(request => {
+  if (request.data.length > 0) {
+    const { email, password, username } = JSON.parse(request.data)
+    const isEmailAlreadyInUse = users.find(user => user.email === email)
+    const isUsernameAlreadyInUse = users.find(user => user.username === username)
 
-// mock.onPost('/jwt/register').reply(request => {
-//   if (request.data.length > 0) {
-//     const { email, password, username } = JSON.parse(request.data)
-//     const isEmailAlreadyInUse = users.find(user => user.email === email)
-//     const isUsernameAlreadyInUse = users.find(user => user.username === username)
+    const error = {
+      email: isEmailAlreadyInUse ? 'This email is already in use.' : null,
+      username: isUsernameAlreadyInUse ? 'This username is already in use.' : null
+    }
+    if (!error.username && !error.email) {
+      const { length } = users
+      let lastIndex = 0
+      if (length) {
+        lastIndex = users[length - 1].id
+      }
 
-//     const error = {
-//       email: isEmailAlreadyInUse ? 'This email is already in use.' : null,
-//       username: isUsernameAlreadyInUse ? 'This username is already in use.' : null
-//     }
-//     if (!error.username && !error.email) {
-//       const { length } = users
-//       let lastIndex = 0
-//       if (length) {
-//         lastIndex = users[length - 1].id
-//       }
+      const userData = {
+        id: lastIndex + 1,
+        email,
+        password,
+        username,
+        avatar: null,
+        fullName: '',
+        role: 'admin'
+      }
+      users.push(userData)
+      const accessToken = jwt.sign({ id: userData.id }, jwtConfig.secret)
+      const user = { ...userData }
+      delete user.password
+      const response = { accessToken }
 
-//       const userData = {
-//         id: lastIndex + 1,
-//         email,
-//         password,
-//         username,
-//         avatar: null,
-//         fullName: '',
-//         role: 'admin'
-//       }
-//       users.push(userData)
-//       const accessToken = jwt.sign({ id: userData.id }, jwtConfig.secret)
-//       const user = { ...userData }
-//       delete user.password
-//       const response = { accessToken }
+      return [200, response]
+    }
 
-//       return [200, response]
-//     }
-
-//     return [200, { error }]
-//   } else {
-//     return [401, { error: 'Invalid Data' }]
-//   }
-// })
-
+    return [200, { error }]
+  } else {
+    return [401, { error: 'Invalid Data' }]
+  }
+})
 mock.onGet('/auth/me').reply(config => {
   // ** Get token from header
   // @ts-ignore

@@ -29,7 +29,8 @@ import { articles } from 'src/views/table/data-grid/Db-Articles'
 
 // ** Third Party Styles Import
 import 'chart.js/auto'
-import ChartjsBarChart from 'src/views/charts/online-charts/ChartjsLineChart'
+import ChartjsBarChart from 'src/views/charts/online-charts/ChartjsBarChart'
+import ArticleCountDistribution from 'src/views/charts/online-charts/ArticleCountDistribution'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -44,14 +45,10 @@ const ChartJS = () => {
   const handleDateRangeChange = range => {
     setSelectedDateRange(range)
 
-    // Filter and count articles based on the selected date range
     const filteredArticles = filterArticlesByDateRange(articles, range)
     const newTableData = countArticlesByCompany(filteredArticles)
-
-    // Calculate share of voice data
     const newShareOfVoiceData = calculateShareOfVoice(filteredArticles)
 
-    // Update the state with the new tableData and shareOfVoiceData
     setTableData(newTableData)
     setShareOfVoiceData(newShareOfVoiceData)
   }
@@ -95,8 +92,13 @@ const ChartJS = () => {
           }
           subtitle={<Typography sx={{ color: 'text.secondary' }}>React wrapper for Chart.js</Typography>}
         />
+        <Grid item xs={12}>
+          <ArticleCountDistribution />
+        </Grid>
 
-        <ChartsAppBar md={6} handleDateRangeChange={handleDateRangeChange} />
+        <Grid item xs={12}>
+          <ChartsAppBar handleDateRangeChange={handleDateRangeChange} />
+        </Grid>
 
         <Grid item xs={12} md={6}>
           {/* Pass color variables as props */}
@@ -116,13 +118,16 @@ const ChartJS = () => {
         </Grid>
         <Grid item xs={12}>
           <ChartjsBarChart
-            white={whiteColor}
-            labelColor={labelColor}
-            success={lineChartYellow}
-            borderColor={borderColor}
+            companyData={tableData} // Pass the company data to the bar chart
+            primary={primaryColor}
+            labelColor={theme.palette.text.disabled}
+            borderColor={theme.palette.divider}
             legendColor={legendColor}
-            primary={lineChartPrimary}
+            yellow={yellowColor}
             warning={lineChartWarning}
+            info={polarChartInfo}
+            grey={polarChartGrey}
+            green={polarChartGreen}
           />
         </Grid>
       </Grid>
