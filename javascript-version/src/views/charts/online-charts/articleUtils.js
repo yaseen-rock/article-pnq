@@ -26,6 +26,10 @@ export const filterArticlesByDateRange = (articles, dateRange) => {
   }
 }
 
+export const filterArticlesByCompany = (articles, companyName) => {
+  return articles.filter(article => article.company === companyName)
+}
+
 export const countArticlesByCompany = articles => {
   const articleCounts = {}
 
@@ -54,4 +58,22 @@ export const calculateShareOfVoice = articles => {
   }))
 
   return shareOfVoiceData
+}
+
+export const calculateArticleCountsByCompany = articles => {
+  const companies = [...new Set(articles.map(article => article.company))]
+
+  return companies.map(company => {
+    const companyArticles = filterArticlesByCompany(articles, company)
+
+    return {
+      company,
+      articleCount: {
+        today: filterArticlesByDateRange(companyArticles, 'today').length,
+        lastWeek: filterArticlesByDateRange(companyArticles, 'last_week').length,
+        lastMonth: filterArticlesByDateRange(companyArticles, 'last_month').length,
+        lastThreeMonths: filterArticlesByDateRange(companyArticles, 'last_three_months').length
+      }
+    }
+  })
 }

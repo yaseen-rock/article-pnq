@@ -23,7 +23,8 @@ import ChartsAppBar from 'src/views/charts/online-charts/ChartsAppBar'
 import {
   filterArticlesByDateRange,
   countArticlesByCompany,
-  calculateShareOfVoice
+  calculateShareOfVoice,
+  calculateArticleCountsByCompany
 } from 'src/views/charts/online-charts/articleUtils' // Adjust the import path
 import { articles } from 'src/views/table/data-grid/Db-Articles'
 
@@ -93,7 +94,7 @@ const ChartJS = () => {
           subtitle={<Typography sx={{ color: 'text.secondary' }}>React wrapper for Chart.js</Typography>}
         />
         <Grid item xs={12}>
-          <ArticleCountDistribution />
+          <ArticleCountDistribution companyData={calculateArticleCountsByCompany(articles)} />
         </Grid>
 
         <Grid item xs={12}>
