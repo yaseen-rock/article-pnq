@@ -19,6 +19,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 import ChartjsPolarAreaChart from 'src/views/charts/online-charts/ChartjsPolarAreaChart'
 import ChartjsTable from 'src/views/charts/online-charts/ChartjsTable'
 import ChartsAppBar from 'src/views/charts/print-charts/ChartsAppBar'
+import ChartjsLineChart from 'src/views/charts/print-charts/ChartjsLineChart'
 
 import {
   filterArticlesByDateRange,
@@ -89,7 +90,7 @@ const ChartJS = () => {
           title={
             <Typography variant='h4'>
               <LinkStyled href='https://github.com/reactchartjs/react-chartjs-2' target='_blank'>
-                React ChartJS 2
+                Print Dashboard
               </LinkStyled>
             </Typography>
           }
@@ -97,6 +98,17 @@ const ChartJS = () => {
         />
         <Grid item xs={12}>
           <ArticleCountDistribution companyData={calculateArticleCountsByCompany(articles)} />
+        </Grid>
+        <Grid item xs={12}>
+          <ChartjsLineChart
+            white={whiteColor}
+            labelColor={labelColor}
+            success={lineChartYellow}
+            borderColor={borderColor}
+            legendColor={legendColor}
+            primary={lineChartPrimary}
+            warning={lineChartWarning}
+          />
         </Grid>
         <Grid item xs={12}>
           <ChartsAppBar handleDateRangeChange={handleDateRangeChange} />
@@ -114,6 +126,29 @@ const ChartJS = () => {
             grey={polarChartGrey}
             green={polarChartGreen}
           />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <ChartjsTable tableData={tableData} />
+        </Grid>
+        <Grid item xs={12}>
+          <ChartjsBarChart
+            companyData={tableData} // Pass the company data to the bar chart
+            primary={primaryColor}
+            labelColor={theme.palette.text.disabled}
+            borderColor={theme.palette.divider}
+            legendColor={legendColor}
+            yellow={yellowColor}
+            warning={lineChartWarning}
+            info={polarChartInfo}
+            grey={polarChartGrey}
+            green={polarChartGreen}
+          />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TopNewsToday />
+        </Grid>
+        <Grid item xs={12} md={6}>
+          <TopNewsForCompetitors />
         </Grid>
       </Grid>
     </DatePickerWrapper>
