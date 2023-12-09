@@ -18,7 +18,7 @@ import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
 import ChartjsPolarAreaChart from 'src/views/charts/online-charts/ChartjsPolarAreaChart'
 import ChartjsTable from 'src/views/charts/online-charts/ChartjsTable'
-import ChartsAppBar from 'src/views/charts/online-charts/ChartsAppBar'
+import ChartsAppBar from 'src/views/charts/print-charts/ChartsAppBar'
 
 import {
   filterArticlesByDateRange,
@@ -31,7 +31,7 @@ import { articles } from 'src/views/table/data-grid/Db-Articles'
 // ** Third Party Styles Import
 import 'chart.js/auto'
 import ChartjsBarChart from 'src/views/charts/online-charts/ChartjsBarChart'
-import ArticleCountDistribution from 'src/views/charts/online-charts/ArticleCountDistribution'
+import ArticleCountDistribution from 'src/views/charts/print-charts/ArticleCountDistribution'
 import TopNewsToday from 'src/views/charts/online-charts/TopNewsToday'
 import TopNewsForCompetitors from 'src/views/charts/online-charts/TopNewsForCompetitors'
 
@@ -98,7 +98,6 @@ const ChartJS = () => {
         <Grid item xs={12}>
           <ArticleCountDistribution companyData={calculateArticleCountsByCompany(articles)} />
         </Grid>
-
         <Grid item xs={12}>
           <ChartsAppBar handleDateRangeChange={handleDateRangeChange} />
         </Grid>
@@ -115,29 +114,6 @@ const ChartJS = () => {
             grey={polarChartGrey}
             green={polarChartGreen}
           />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <ChartjsTable tableData={tableData} />
-        </Grid>
-        <Grid item xs={12}>
-          <ChartjsBarChart
-            companyData={tableData} // Pass the company data to the bar chart
-            primary={primaryColor}
-            labelColor={theme.palette.text.disabled}
-            borderColor={theme.palette.divider}
-            legendColor={legendColor}
-            yellow={yellowColor}
-            warning={lineChartWarning}
-            info={polarChartInfo}
-            grey={polarChartGrey}
-            green={polarChartGreen}
-          />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TopNewsToday />
-        </Grid>
-        <Grid item xs={12} md={6}>
-          <TopNewsForCompetitors />
         </Grid>
       </Grid>
     </DatePickerWrapper>

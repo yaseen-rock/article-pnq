@@ -17,8 +17,8 @@ import TableEditable from 'src/views/table/data-grid/TableEditable'
 import TableBasicSort from 'src/views/table/data-grid/TableBasicSort'
 import TableSelection from 'src/views/table/data-grid/TableSelection'
 import TableServerSide from 'src/views/table/data-grid/TableServerSide'
-import ArticleSelection from 'src/views/table/data-grid/ArticleSelection'
-import CardSelection from 'src/views/table/data-grid/CardSelection'
+import ArticleSelection from 'src/views/table/online-headlines/ArticleSelection'
+import CardSelection from 'src/views/table/online-headlines/CardSelection'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -42,7 +42,7 @@ const DataGrid = () => {
           </Typography>
         }
       />
-      <Grid item xs={12}>
+      {/* <Grid item xs={12}>
         <TableBasic />
       </Grid>
       <Grid item xs={12}>
@@ -62,7 +62,7 @@ const DataGrid = () => {
       </Grid>
       <Grid item xs={12}>
         <TableServerSide />
-      </Grid>
+      </Grid> */}
 
       <Grid item xs={12}>
         <ArticleSelection />

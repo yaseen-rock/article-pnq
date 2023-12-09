@@ -546,12 +546,22 @@ const navigation = () => {
       path: '/tables/data-grid'
     },
     {
+      title: 'Online Headlines',
+      icon: 'tabler:layout-grid',
+      path: '/tables/online-headlines'
+    },
+    {
       sectionTitle: 'Charts & Misc'
     },
     {
       title: 'Online Dashboard',
       icon: 'tabler:chart-pie',
       path: '/charts/online-dashboard'
+    },
+    {
+      title: 'Print Dashboard',
+      icon: 'tabler:toggle-left',
+      path: '/charts/print-dashboard'
     },
     {
       title: 'Charts',

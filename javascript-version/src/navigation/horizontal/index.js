@@ -128,7 +128,6 @@ const navigation = () => {
           icon: 'tabler:brand-tabler'
         },
         {
-          
           title: 'Cards',
           icon: 'tabler:id',
           children: [
@@ -237,7 +236,7 @@ const navigation = () => {
             {
               title: 'More',
               path: '/components/more'
-            },
+            }
           ]
         }
       ]
@@ -530,7 +529,7 @@ const navigation = () => {
             {
               title: 'Input Mask',
               path: '/forms/form-elements/input-mask'
-            },
+            }
           ]
         },
         {
@@ -557,8 +556,23 @@ const navigation = () => {
           title: 'Mui DataGrid',
           icon: 'tabler:layout-grid',
           path: '/tables/data-grid'
+        },
+        {
+          title: 'Online Headlines',
+          icon: 'tabler:layout-grid',
+          path: '/tables/online-headlines'
         }
       ]
+    },
+    {
+      title: 'Online Dashboard',
+      icon: 'tabler:chart-pie',
+      path: '/charts/online-dashboard'
+    },
+    {
+      title: 'Print Dashboard',
+      icon: 'tabler:toggle-left',
+      path: '/charts/print-dashboard'
     },
     {
       title: 'Charts',

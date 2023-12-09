@@ -20,7 +20,7 @@ import Grid from '@mui/material/Grid'
 const ArticleCountDistribution = ({ companyData }) => {
   const sliderRef = useRef(null)
   const [currentPage, setCurrentPage] = useState(1)
-  const [slidesToShow, setSlidesToShow] = useState(3)
+  const [slidesToShow, setSlidesToShow] = useState(2) // Change this to 2 for two columns
 
   const totalTables = Math.ceil(companyData.length / slidesToShow)
 
@@ -30,13 +30,6 @@ const ArticleCountDistribution = ({ companyData }) => {
     slidesToShow,
     slidesToScroll: slidesToShow,
     responsive: [
-      {
-        breakpoint: 850,
-        settings: {
-          slidesToShow: 2,
-          slidesToScroll: 2
-        }
-      },
       {
         breakpoint: 650,
         settings: {
@@ -50,7 +43,7 @@ const ArticleCountDistribution = ({ companyData }) => {
   useEffect(() => {
     const handleResize = () => {
       const width = window.innerWidth
-      const newSlidesToShow = width < 650 ? 1 : width < 850 ? 2 : 3
+      const newSlidesToShow = width < 650 ? 1 : 2 // Adjust breakpoint logic for two columns
 
       if (slidesToShow !== newSlidesToShow) {
         setSlidesToShow(newSlidesToShow)
@@ -91,24 +84,29 @@ const ArticleCountDistribution = ({ companyData }) => {
                     <TableHead>
                       <TableRow>
                         <TableCell>{company.company}</TableCell>
+                        <TableCell>Tier 1</TableCell>
                         <TableCell>Overall</TableCell>
                       </TableRow>
                     </TableHead>
                     <TableBody>
                       <TableRow>
                         <TableCell>Today</TableCell>
+                        <TableCell>13</TableCell>
                         <TableCell>{company.articleCount.today}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Last Week</TableCell>
+                        <TableCell>20</TableCell>
                         <TableCell>{company.articleCount.lastWeek}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Last Month</TableCell>
+                        <TableCell>10</TableCell>
                         <TableCell>{company.articleCount.lastMonth}</TableCell>
                       </TableRow>
                       <TableRow>
                         <TableCell>Last Three Months</TableCell>
+                        <TableCell>1</TableCell>
                         <TableCell>{company.articleCount.lastThreeMonths}</TableCell>
                       </TableRow>
                     </TableBody>
