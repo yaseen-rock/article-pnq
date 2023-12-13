@@ -10,8 +10,8 @@ import Typography from '@mui/material/Typography'
 import PageHeader from 'src/@core/components/page-header'
 
 // ** Demo Components Imports
-import ArticleSelection from 'src/views/table/online-headlines/ArticleSelection'
-import CardSelection from 'src/views/table/online-headlines/CardSelection'
+import ArticleSelection from 'src/views/table/print-headlines/ArticleSelection'
+import CardSelection from 'src/views/table/print-headlines/CardSelection'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -25,7 +25,7 @@ const DataGrid = () => {
         title={
           <Typography variant='h4'>
             <LinkStyled href='https://mui.com/x/react-data-grid/' target='_blank'>
-              Online Headlines
+              Print Headlines
             </LinkStyled>
           </Typography>
         }
