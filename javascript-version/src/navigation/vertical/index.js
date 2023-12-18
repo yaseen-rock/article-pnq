@@ -575,6 +575,14 @@ const navigation = () => {
       title: 'Print Dashboard',
       icon: 'tabler:toggle-left',
       path: '/charts/print-dashboard'
+    },
+    {
+      sectionTitle: 'Demo'
+    },
+    {
+      title: 'Demo page',
+      icon: 'tabler:archive',
+      path: '/demo-page'
     }
 
     // {
