@@ -81,12 +81,12 @@ const FormControlLabel = styled(MuiFormControlLabel)(({ theme }) => ({
 }))
 
 const schema = yup.object().shape({
-  password: yup.string().min(5).required()
+  password: yup.string().min(3).required()
 })
 
 const defaultValues = {
-  password: 'admin',
-  email: 'admin@vuexy.com'
+  password: 'TataG',
+  email: 'TataG'
 }
 
 const LoginPage = () => {
@@ -116,7 +116,7 @@ const LoginPage = () => {
 
   const onSubmit = data => {
     const { email, password } = data
-    auth.login({ email, password, rememberMe }, () => {
+    auth.login({ loginName: email, password, rememberMe }, () => {
       setError('email', {
         type: 'manual',
         message: 'Email or Password is invalid'

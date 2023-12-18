@@ -10,22 +10,13 @@ const navigation = () => {
           title: 'Analytics',
           path: '/dashboards/analytics'
         },
-
-        // {
-        //   title: 'CRM',
-        //   path: '/dashboards/crm'
-        // },
-        // {
-        //   title: 'eCommerce',
-        //   path: '/dashboards/ecommerce'
-        // },
         {
           title: 'Print',
-          path: '/dashboards/print-dashboard'
+          path: '/dashboards/print'
         },
         {
           title: 'Online',
-          path: '/dashboards/online-dashboard'
+          path: '/dashboards/online'
         }
       ]
     },
@@ -560,17 +551,17 @@ const navigation = () => {
     {
       title: 'Online Headlines',
       icon: 'tabler:layout-grid',
-      path: '/tables/online-headlines'
+      path: '/headlines/online'
     },
     {
       title: 'Print Headlines',
       icon: 'tabler:layout-grid',
-      path: '/tables/print-headlines'
+      path: '/headlines/print'
     },
     {
       title: 'Print & Online Headlines',
       icon: 'tabler:layout-grid',
-      path: '/tables/print-online-headlines'
+      path: '/headlines/print-online'
     },
     {
       sectionTitle: 'Charts & Misc'
