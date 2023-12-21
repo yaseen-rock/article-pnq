@@ -25,7 +25,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 // 1D Icon
 const OneDIcon = props => (
   <SvgIcon {...props}>
-    <text x='50%' y='50%' fill='#7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
+    <text x='50%' y='50%' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
       1D
     </text>
   </SvgIcon>
@@ -34,7 +34,7 @@ const OneDIcon = props => (
 // 2D Icon
 const TwoDIcon = props => (
   <SvgIcon {...props}>
-    <text x='50%' y='50%' fill='#7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
+    <text x='50%' y='50%' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
       7D
     </text>
   </SvgIcon>
@@ -43,7 +43,7 @@ const TwoDIcon = props => (
 // 3D Icon
 const ThreeDIcon = props => (
   <SvgIcon {...props}>
-    <text x='50%' y='50%' fill=' #7367F0' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
+    <text x='50%' y='50%' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
       1M
     </text>
   </SvgIcon>
@@ -67,7 +67,8 @@ const ArticleListToolbar = ({
   selectedStartDate,
   setSelectedStartDate,
   selectedEndDate,
-  setSelectedEndDate
+  setSelectedEndDate,
+  primaryColor
 }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
@@ -91,36 +92,36 @@ const ArticleListToolbar = ({
           onChange={e => setSearchQuery(e.target.value)}
         />
       )}
-      <IconButton onClick={toggleSearchBarVisibility} sx={{ color: '#7367F0', mr: 1 }}>
+      <Button onClick={toggleSearchBarVisibility} sx={{ color: primaryColor, mr: 0 }}>
         <SearchIcon />
-      </IconButton>
-      <IconButton onClick={handleDelete} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={handleDelete} sx={{ color: primaryColor, mr: 0 }}>
         <DeleteIcon />
-      </IconButton>
-      <IconButton onClick={handleEmail} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={handleEmail} sx={{ color: primaryColor, mr: 0 }}>
         <EmailIcon />
-      </IconButton>
-      <IconButton onClick={handleImage} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={handleImage} sx={{ color: primaryColor, mr: 0 }}>
         <ImageIcon />
-      </IconButton>
-      <IconButton onClick={handleDownload} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={handleDownload} sx={{ color: primaryColor, mr: 0 }}>
         <DownloadIcon />
-      </IconButton>
-      <IconButton onClick={handleRssFeed} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={handleRssFeed} sx={{ color: primaryColor, mr: 0 }}>
         <RssFeedIcon />
-      </IconButton>
-      <IconButton onClick={openFilterPopover} sx={{ color: '#7367F0' }}>
+      </Button>
+      <Button onClick={openFilterPopover} sx={{ color: primaryColor, mr: 0 }}>
         <DateRangeIcon />
-      </IconButton>
-      <IconButton onClick={handleFilter1D}>
+      </Button>
+      <Button onClick={handleFilter1D} sx={{ color: primaryColor, mr: 0 }}>
         <OneDIcon />
-      </IconButton>
-      <IconButton onClick={handleFilter7D}>
+      </Button>
+      <Button onClick={handleFilter7D} sx={{ color: primaryColor, mr: 0 }}>
         <TwoDIcon />
-      </IconButton>
-      <IconButton onClick={handleFilter1M}>
+      </Button>
+      <Button onClick={handleFilter1M} sx={{ color: primaryColor, mr: 0 }}>
         <ThreeDIcon />
-      </IconButton>
+      </Button>
       <Popover
         open={Boolean(filterPopoverAnchor)}
         anchorEl={filterPopoverAnchor}

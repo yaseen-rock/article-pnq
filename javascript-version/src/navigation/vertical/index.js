@@ -341,11 +341,12 @@ const navigation = () => {
     //   icon: 'tabler:typography',
     //   path: '/ui/typography'
     // },
-    // {
-    //   title: 'Icons',
-    //   path: '/ui/icons',
-    //   icon: 'tabler:brand-tabler'
-    // },
+    {
+      title: 'Icons',
+      path: '/ui/icons',
+      icon: 'tabler:brand-tabler'
+    },
+
     // {
     //   title: 'Cards',
     //   icon: 'tabler:id',
@@ -582,7 +583,7 @@ const navigation = () => {
     {
       title: 'Demo page',
       icon: 'tabler:archive',
-      path: '/demo-page'
+      path: '/demo-pages'
     }
 
     // {

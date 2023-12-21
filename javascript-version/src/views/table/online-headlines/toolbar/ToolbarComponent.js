@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Toolbar from '@mui/material/Toolbar'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
@@ -7,6 +7,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import AppBar from '@mui/material/AppBar'
 import Grid from '@mui/material/Grid'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import axios from 'axios'
 
 const ToolbarComponent = () => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
@@ -14,6 +15,15 @@ const ToolbarComponent = () => {
   const [languageAnchor, setLanguageAnchor] = useState(null)
   const [mediaAnchor, setMediaAnchor] = useState(null)
   const [tagsAnchor, setTagsAnchor] = useState(null)
+  const [companies, setCompanies] = useState([])
+
+  const [userData, setUserData] = useState({
+    email: '',
+    fullName: '',
+    clientId: '',
+    clientName: '',
+    role: ''
+  })
 
   const openDropdown = (event, anchorSetter) => {
     anchorSetter(event.currentTarget)
@@ -29,6 +39,38 @@ const ToolbarComponent = () => {
   }
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+
+  useEffect(() => {
+    // Assuming you have a function to fetch user data and companies
+    const fetchUserDataAndCompanies = async () => {
+      try {
+        // Make a request to get user data (assuming this is stored in localStorage)
+        const storedUserData = localStorage.getItem('userData')
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData))
+        }
+
+        // Make a request to get companies using access token and client ID
+        const storedToken = localStorage.getItem('accessToken')
+        if (storedToken && userData.clientId) {
+          const response = await axios.post(
+            'http://51.68.220.77:8001/companyListByClient/',
+            { clientId: userData.clientId },
+            {
+              headers: {
+                Authorization: `Bearer ${storedToken}`
+              }
+            }
+          )
+          setCompanies(response.data.companies)
+        }
+      } catch (error) {
+        console.error('Error fetching user data and companies:', error)
+      }
+    }
+
+    fetchUserDataAndCompanies()
+  }, [userData.clientId]) // Trigger the effect when clientId changes
 
   return (
     <AppBar sx={{ position: 'static' }}>
@@ -114,15 +156,16 @@ const ToolbarComponent = () => {
           </>
         )}
 
-        {/* Dropdown Menus */}
         <Menu
           open={Boolean(competitionAnchor)}
           anchorEl={competitionAnchor}
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {companies.map(company => (
+            <MenuItem key={company.companyid} onClick={handleDropdownItemClick}>
+              {company.companyname}
+            </MenuItem>
+          ))}
         </Menu>
         {/* Geography Dropdown Menu */}
         <Menu
