@@ -16,6 +16,8 @@ const ToolbarComponent = () => {
   const [mediaAnchor, setMediaAnchor] = useState(null)
   const [tagsAnchor, setTagsAnchor] = useState(null)
   const [companies, setCompanies] = useState([])
+  const [languages, setLanguages] = useState({})
+  const [cities, setCities] = useState([])
 
   const [userData, setUserData] = useState({
     email: '',
@@ -41,16 +43,13 @@ const ToolbarComponent = () => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
   useEffect(() => {
-    // Assuming you have a function to fetch user data and companies
     const fetchUserDataAndCompanies = async () => {
       try {
-        // Make a request to get user data (assuming this is stored in localStorage)
         const storedUserData = localStorage.getItem('userData')
         if (storedUserData) {
           setUserData(JSON.parse(storedUserData))
         }
 
-        // Make a request to get companies using access token and client ID
         const storedToken = localStorage.getItem('accessToken')
         if (storedToken && userData.clientId) {
           const response = await axios.post(
@@ -64,13 +63,29 @@ const ToolbarComponent = () => {
           )
           setCompanies(response.data.companies)
         }
+
+        // Fetch languages
+        const languageResponse = await axios.get('http://51.68.220.77:8001/languagelist/', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        setLanguages(languageResponse.data.languages)
+
+        // Fetch cities
+        const citiesResponse = await axios.get('http://51.68.220.77:8001/citieslist/', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        setCities(citiesResponse.data.cities)
       } catch (error) {
         console.error('Error fetching user data and companies:', error)
       }
     }
 
     fetchUserDataAndCompanies()
-  }, [userData.clientId]) // Trigger the effect when clientId changes
+  }, [userData.clientId])
 
   return (
     <AppBar sx={{ position: 'static' }}>
@@ -173,18 +188,21 @@ const ToolbarComponent = () => {
           anchorEl={geographyAnchor}
           onClose={() => closeDropdown(setGeographyAnchor)}
         >
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {cities.map(city => (
+            <MenuItem key={city.cityId} onClick={handleDropdownItemClick}>
+              {city.cityName}
+            </MenuItem>
+          ))}
         </Menu>
 
         {/* Language Dropdown Menu */}
         <Menu open={Boolean(languageAnchor)} anchorEl={languageAnchor} onClose={() => closeDropdown(setLanguageAnchor)}>
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {Object.entries(languages).map(([languageName, languageCode]) => (
+            <MenuItem key={languageCode} onClick={handleDropdownItemClick}>
+              {languageName}
+            </MenuItem>
+          ))}
         </Menu>
-
         {/* Media Dropdown Menu */}
         <Menu open={Boolean(mediaAnchor)} anchorEl={mediaAnchor} onClose={() => closeDropdown(setMediaAnchor)}>
           <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
