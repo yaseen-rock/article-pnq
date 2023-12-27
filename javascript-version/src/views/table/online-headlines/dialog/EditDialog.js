@@ -7,63 +7,63 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 
-const EditDialog = ({ open, handleClose, article, handleSave }) => {
-  const [editedArticle, setEditedArticle] = useState({
-    article: '',
-    shortHeading: '',
-    description: ''
+const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
+  const [editedSocialFeed, setEditedSocialFeed] = useState({
+    headline: '',
+    publisher: '',
+    summary: ''
   })
 
   useEffect(() => {
-    if (article) {
-      setEditedArticle({
-        article: article.article || '',
-        shortHeading: article.shortHeading || '',
-        description: article.description || ''
+    if (socialFeed) {
+      setEditedSocialFeed({
+        headline: socialFeed.headline || '',
+        publisher: socialFeed.publisher || '',
+        summary: socialFeed.summary || ''
       })
     }
-  }, [article])
+  }, [socialFeed])
 
   const handleDiscard = () => {
-    setEditedArticle({
-      article: article.article || '',
-      shortHeading: article.shortHeading || '',
-      description: article.description || ''
+    setEditedSocialFeed({
+      headline: socialFeed.headline || '',
+      publisher: socialFeed.publisher || '',
+      summary: socialFeed.summary || ''
     })
     handleClose()
   }
 
   const handleInputChange = (field, value) => {
-    setEditedArticle(prev => ({ ...prev, [field]: value }))
+    setEditedSocialFeed(prev => ({ ...prev, [field]: value }))
   }
 
   const handleSaveChanges = () => {
-    handleSave(editedArticle)
+    handleSave(editedSocialFeed)
     handleClose()
   }
 
   return (
     <Dialog open={open} onClose={handleClose}>
-      <DialogTitle>Edit Article</DialogTitle>
+      <DialogTitle>Edit Social Feed</DialogTitle>
       <DialogContent>
         <TextField
-          label='Article'
-          value={editedArticle.article}
-          onChange={e => handleInputChange('article', e.target.value)}
+          label='Headline'
+          value={editedSocialFeed.headline}
+          onChange={e => handleInputChange('headline', e.target.value)}
           fullWidth
           margin='normal'
         />
         <TextField
-          label='Short Heading'
-          value={editedArticle.shortHeading}
-          onChange={e => handleInputChange('shortHeading', e.target.value)}
+          label='Publisher'
+          value={editedSocialFeed.publisher}
+          onChange={e => handleInputChange('publisher', e.target.value)}
           fullWidth
           margin='normal'
         />
         <TextField
-          label='Description'
-          value={editedArticle.description}
-          onChange={e => handleInputChange('description', e.target.value)}
+          label='Summary'
+          value={editedSocialFeed.summary}
+          onChange={e => handleInputChange('summary', e.target.value)}
           fullWidth
           multiline
           rows={4}

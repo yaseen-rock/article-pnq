@@ -9,7 +9,7 @@ import Grid from '@mui/material/Grid'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import axios from 'axios'
 
-const ToolbarComponent = () => {
+const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
   const [geographyAnchor, setGeographyAnchor] = useState(null)
   const [languageAnchor, setLanguageAnchor] = useState(null)
@@ -35,8 +35,10 @@ const ToolbarComponent = () => {
     anchorSetter(null)
   }
 
-  const handleDropdownItemClick = () => {
-    console.log('Dropdown item clicked')
+  const handleDropdownItemClick = companyId => {
+    console.log('Selected Company ID:', companyId)
+    setSelectedCompanyId(companyId)
+    console.log('Updated Selected Company ID:', selectedCompanyId) // Add this line
     closeDropdown(setCompetitionAnchor)
   }
 
@@ -52,15 +54,14 @@ const ToolbarComponent = () => {
 
         const storedToken = localStorage.getItem('accessToken')
         if (storedToken && userData.clientId) {
-          const response = await axios.post(
-            'http://51.68.220.77:8001/companyListByClient/',
-            { clientId: userData.clientId },
-            {
-              headers: {
-                Authorization: `Bearer ${storedToken}`
-              }
+          const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            },
+            params: {
+              clientId: userData.clientId
             }
-          )
+          })
           setCompanies(response.data.companies)
         }
 
@@ -177,8 +178,8 @@ const ToolbarComponent = () => {
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
           {companies.map(company => (
-            <MenuItem key={company.companyid} onClick={handleDropdownItemClick}>
-              {company.companyname}
+            <MenuItem key={company.companyId} onClick={() => handleDropdownItemClick(company.companyId)}>
+              {company.companyName}
             </MenuItem>
           ))}
         </Menu>

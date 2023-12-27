@@ -1,5 +1,6 @@
 // ** React Import
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import axios from 'axios'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -23,65 +24,62 @@ import { articles } from './Db-Articles'
 
 import useMediaQuery from '@mui/material/useMediaQuery'
 
-// ** Renders article column
-const renderArticle = params => {
+// ** Renders social feed column
+const renderSocialFeed = params => {
   const { row } = params
-  const stateNum = Math.floor(Math.random() * 6)
-  const states = ['success', 'error', 'warning', 'info', 'primary', 'secondary']
-  const color = states[stateNum]
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-        {row.article}
+        {row.headline}
       </Typography>
       <Typography noWrap variant='caption'>
-        {row.shortHeading}
+        {row.publisher}
       </Typography>
-      {/* Displaying the description */}
+      {/* Displaying the summary */}
       <Typography noWrap variant='caption'>
-        {row.description}
+        {row.summary}
       </Typography>
     </Box>
   )
 }
 
 const TableSelection = () => {
-  const columns = [
+  const socialFeedColumns = [
     {
       flex: 0.1,
       minWidth: 5,
       headerName: 'Select',
       field: 'select',
-
       renderCell: params => (
         <Checkbox
           checked={params.row.isSelected}
-          onChange={() => params.api.selectRow(params.row.id, !params.row.isSelected, false)}
+          onChange={() => params.api.selectRow(params.row.socialFeedId, !params.row.isSelected, false)}
           onClick={e => e.stopPropagation()} // Stop propagation to prevent opening the dialog
         />
       )
     },
     {
-      flex: 0.25,
+      flex: 0.4,
       minWidth: 240,
-      field: 'article',
-      headerName: 'Article',
-      renderCell: renderArticle
+      field: 'socialFeed',
+      headerName: 'Social Feed',
+      renderCell: renderSocialFeed
     },
     {
-      flex: 0.175,
+      flex: 0.11,
       type: 'date',
       minWidth: 30,
-      headerName: 'Issue Date',
+      headerName: 'Date',
       field: 'date',
       valueGetter: params => new Date(params.value),
       renderCell: params => (
         <Typography variant='body2' sx={{ color: 'text.primary' }}>
-          {params.row.date}
+          {new Date(params.row.feedDate).toLocaleDateString()} {/* Format date without time */}
         </Typography>
       )
     },
+
     {
       flex: 0.1,
       minWidth: 5,
@@ -104,7 +102,13 @@ const TableSelection = () => {
   const isNarrowMobileView = useMediaQuery('(max-width: 405px)')
 
   // ** State
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 })
+  const [socialFeeds, setSocialFeeds] = useState([])
+
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 5, // Default pageSize
+    totalRecords: 0 // New state for totalRecords
+  })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
   const [selectedEndDate, setSelectedEndDate] = useState(null)
   const [filterPopoverAnchor, setFilterPopoverAnchor] = useState(null)
@@ -112,6 +116,8 @@ const TableSelection = () => {
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false)
   const [selectedDuration, setSelectedDuration] = useState(null)
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
+  const getRowId = row => row.socialFeedId
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null)
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -122,6 +128,51 @@ const TableSelection = () => {
     // Add logic to save changes to the article
     console.log('Saving changes:', editedArticle)
   }
+
+  // Fetch social feeds based on the provided API
+  const fetchSocialFeeds = async () => {
+    try {
+      const storedToken = localStorage.getItem('accessToken')
+      const storedClientId = localStorage.getItem('clientId')
+
+      if (storedToken) {
+        const base_url = 'http://51.68.220.77:8001'
+
+        const request_params = {
+          clientIds: [storedClientId],
+          companyIds: selectedCompanyId,
+          fromDate: '2022-12-01 00:00:00',
+          toDate: '2023-12-05 00:00:00',
+          page: 1,
+          recordsPerPage: 500
+        }
+
+        const response = await axios.get(`${base_url}/clientWiseSocialFeeds/`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: request_params
+        })
+
+        const totalRecords = response.data.totalRecords || 0
+
+        // Assuming the API response contains socialFeeds
+        setSocialFeeds(response.data.socialFeeds)
+
+        // Update totalRecords in the state
+        setPaginationModel(prevPagination => ({
+          ...prevPagination,
+          totalRecords
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching social feeds:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchSocialFeeds()
+  }, [selectedCompanyId, paginationModel.page, paginationModel.pageSize])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -169,9 +220,9 @@ const TableSelection = () => {
     return result
   }, [selectedStartDate, selectedEndDate, searchQuery, selectedDuration])
 
-  // Divide articles into left and right columns
-  const leftArticles = filteredArticles.filter((_, index) => index % 2 === 0)
-  const rightArticles = filteredArticles.filter((_, index) => index % 2 !== 0)
+  // Divide social feeds into left and right columns
+  const leftSocialFeeds = socialFeeds.filter((_, index) => index % 2 === 0)
+  const rightSocialFeeds = socialFeeds.filter((_, index) => index % 2 !== 0)
 
   // Open the date filter popover
   const openFilterPopover = event => {
@@ -243,7 +294,7 @@ const TableSelection = () => {
     <Card>
       <CardHeader title='Article Selection' />
       {/* Top Toolbar */}
-      <ToolbarComponent />
+      <ToolbarComponent selectedCompanyId={selectedCompanyId} setSelectedCompanyId={setSelectedCompanyId} />
       {/* Toolbar with Date Filter */}
       <ArticleListToolbar
         setSearchQuery={setSearchQuery}
@@ -273,13 +324,15 @@ const TableSelection = () => {
               <Box flex='1' p={2} pr={1}>
                 <DataGrid
                   autoHeight
-                  rows={leftArticles}
-                  columns={columns}
+                  rows={leftSocialFeeds}
+                  columns={socialFeedColumns}
                   pageSizeOptions={[5, 10, 50]}
                   paginationModel={paginationModel}
                   onPaginationModelChange={setPaginationModel}
                   onRowClick={params => handleRowClick(params)}
                   hideFooterPagination
+                  getRowId={getRowId}
+                  rowCount={paginationModel.totalRecords}
                 />
               </Box>
             )}
@@ -288,20 +341,22 @@ const TableSelection = () => {
             <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
               <DataGrid
                 autoHeight
-                rows={rightArticles}
-                columns={columns}
+                rows={rightSocialFeeds}
+                columns={socialFeedColumns}
                 pageSizeOptions={[5, 10, 50]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
                 onRowClick={params => handleRowClick(params)}
+                getRowId={getRowId}
+                rowCount={paginationModel.totalRecords}
               />
             </Box>
           </Box>
         ) : (
           <DataGrid
             autoHeight
-            rows={filteredArticles}
-            columns={columns.filter(column => {
+            rows={socialFeeds}
+            columns={socialFeedColumns.filter(column => {
               // Check if it's mobile view and exclude only the "Select" and "Edit" columns
               if (isMobileView) {
                 return (
@@ -317,6 +372,8 @@ const TableSelection = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             onRowClick={params => handleRowClick(params)}
+            getRowId={getRowId}
+            rowCount={paginationModel.totalRecords}
           />
         )}
       </Box>
@@ -330,7 +387,7 @@ const TableSelection = () => {
       <EditDialog
         open={isEditDialogOpen}
         handleClose={() => setEditDialogOpen(false)}
-        article={selectedArticle}
+        socialFeed={selectedArticle}
         handleSave={handleSaveChanges}
       />
     </Card>
