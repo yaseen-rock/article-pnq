@@ -12,7 +12,7 @@ import { DataGrid } from '@mui/x-data-grid'
 import Checkbox from '@mui/material/Checkbox'
 
 import ToolbarComponent from './toolbar/ToolbarComponent'
-import ArticleFullScreenDialog from './dialog/ArticleDialog'
+import SocialFeedFullScreenDialog from './dialog/ArticleDialog'
 import EditDialog from './dialog/EditDialog'
 import ArticleListToolbar from './toolbar/ArticleListToolbar'
 
@@ -23,10 +23,13 @@ import EditIcon from '@mui/icons-material/Edit'
 import { articles } from './Db-Articles'
 
 import useMediaQuery from '@mui/material/useMediaQuery'
+import dayjs from 'dayjs'
 
 // ** Renders social feed column
 const renderSocialFeed = params => {
   const { row } = params
+
+  const formattedDate = dayjs(row.feedDate).format('DD-MM-YYYY')
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -35,6 +38,7 @@ const renderSocialFeed = params => {
       </Typography>
       <Typography noWrap variant='caption'>
         {row.publisher}
+        <span style={{ marginLeft: '4px' }}>({formattedDate})</span>
       </Typography>
       {/* Displaying the summary */}
       <Typography noWrap variant='caption'>
@@ -60,24 +64,11 @@ const TableSelection = () => {
       )
     },
     {
-      flex: 0.4,
+      flex: 0.6,
       minWidth: 240,
       field: 'socialFeed',
       headerName: 'Social Feed',
       renderCell: renderSocialFeed
-    },
-    {
-      flex: 0.11,
-      type: 'date',
-      minWidth: 30,
-      headerName: 'Date',
-      field: 'date',
-      valueGetter: params => new Date(params.value),
-      renderCell: params => (
-        <Typography variant='body2' sx={{ color: 'text.primary' }}>
-          {new Date(params.row.feedDate).toLocaleDateString()} {/* Format date without time */}
-        </Typography>
-      )
     },
 
     {
@@ -97,7 +88,7 @@ const TableSelection = () => {
       )
     }
   ]
-  const isNotResponsive = useMediaQuery('(min-width: 1000px )')
+  const isNotResponsive = useMediaQuery('(min-width: 1100px )')
   const isMobileView = useMediaQuery('(max-width: 530px)')
   const isNarrowMobileView = useMediaQuery('(max-width: 405px)')
 
@@ -106,7 +97,7 @@ const TableSelection = () => {
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 5, // Default pageSize
+    pageSize: 10, // Default pageSize
     totalRecords: 0 // New state for totalRecords
   })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
@@ -141,11 +132,14 @@ const TableSelection = () => {
         const request_params = {
           clientIds: [storedClientId],
           companyIds: selectedCompanyId,
-          fromDate: '2022-12-01 00:00:00',
-          toDate: '2023-12-05 00:00:00',
+          fromDate: selectedStartDate?.toISOString(),
+          toDate: selectedEndDate?.toISOString(),
           page: 1,
-          recordsPerPage: 500
+          recordsPerPage: 100
         }
+
+        console.log(selectedEndDate?.toISOString())
+        console.log(selectedEndDate?.toISOString())
 
         const response = await axios.get(`${base_url}/clientWiseSocialFeeds/`, {
           headers: {
@@ -172,20 +166,11 @@ const TableSelection = () => {
 
   useEffect(() => {
     fetchSocialFeeds()
-  }, [selectedCompanyId, paginationModel.page, paginationModel.pageSize])
+  }, [selectedCompanyId, selectedEndDate, selectedStartDate, paginationModel.page, paginationModel.pageSize])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
     let result = articles
-
-    // Apply date range filter
-    if (selectedStartDate && selectedEndDate) {
-      result = result.filter(article => {
-        const articleDate = new Date(article.date)
-
-        return articleDate >= selectedStartDate && articleDate <= selectedEndDate
-      })
-    }
 
     // Apply search query filter
     if (searchQuery) {
@@ -197,28 +182,8 @@ const TableSelection = () => {
       )
     }
 
-    // Apply duration filter
-    if (selectedDuration) {
-      const currentDate = new Date()
-      const startDate = new Date(currentDate)
-
-      if (selectedDuration === 1) {
-        startDate.setDate(currentDate.getDate() - 1)
-      } else if (selectedDuration === 7) {
-        startDate.setDate(currentDate.getDate() - selectedDuration)
-      } else if (selectedDuration === 30) {
-        startDate.setMonth(currentDate.getMonth() - 1)
-      }
-
-      result = result.filter(article => {
-        const articleDate = new Date(article.date)
-
-        return articleDate >= startDate && articleDate <= currentDate
-      })
-    }
-
     return result
-  }, [selectedStartDate, selectedEndDate, searchQuery, selectedDuration])
+  }, [searchQuery])
 
   // Divide social feeds into left and right columns
   const leftSocialFeeds = socialFeeds.filter((_, index) => index % 2 === 0)
@@ -270,18 +235,6 @@ const TableSelection = () => {
     console.log('Search action triggered')
   }
 
-  const handleFilter1D = () => {
-    setSelectedDuration(1)
-  }
-
-  const handleFilter7D = () => {
-    setSelectedDuration(7)
-  }
-
-  const handleFilter1M = () => {
-    setSelectedDuration(30)
-  }
-
   const [selectedArticle, setSelectedArticle] = useState(null)
   const [isPopupOpen, setPopupOpen] = useState(false)
 
@@ -292,7 +245,7 @@ const TableSelection = () => {
 
   return (
     <Card>
-      <CardHeader title='Article Selection' />
+      <CardHeader title='Social Feed' />
       {/* Top Toolbar */}
       <ToolbarComponent selectedCompanyId={selectedCompanyId} setSelectedCompanyId={setSelectedCompanyId} />
       {/* Toolbar with Date Filter */}
@@ -306,9 +259,6 @@ const TableSelection = () => {
         handleDownload={handleDownload}
         handleRssFeed={handleRssFeed}
         openFilterPopover={openFilterPopover}
-        handleFilter1D={handleFilter1D}
-        handleFilter7D={handleFilter7D}
-        handleFilter1M={handleFilter1M}
         filterPopoverAnchor={filterPopoverAnchor}
         closeFilterPopover={closeFilterPopover}
         selectedStartDate={selectedStartDate}
@@ -359,11 +309,7 @@ const TableSelection = () => {
             columns={socialFeedColumns.filter(column => {
               // Check if it's mobile view and exclude only the "Select" and "Edit" columns
               if (isMobileView) {
-                return (
-                  column.field !== 'select' &&
-                  column.field !== 'edit' &&
-                  !(column.field === 'date' && isNarrowMobileView)
-                )
+                return column.field !== 'select' && column.field !== 'edit' && !isNarrowMobileView
               }
 
               return true
@@ -378,10 +324,11 @@ const TableSelection = () => {
         )}
       </Box>
       {/* Popup Window */}
-      <ArticleFullScreenDialog
+      <SocialFeedFullScreenDialog
         open={isPopupOpen}
         handleClose={() => setPopupOpen(false)}
-        article={selectedArticle}
+        socialFeed={selectedArticle}
+        formattedDate={dayjs(selectedArticle?.feedDate).format('DD-MM-YYYY')}
       />{' '}
       {/* Edit Dialog */}
       <EditDialog

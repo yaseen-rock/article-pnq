@@ -1,5 +1,6 @@
 // ** React Import
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import axios from 'axios'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -23,65 +24,62 @@ import { articles } from './Db-Articles'
 
 import useMediaQuery from '@mui/material/useMediaQuery'
 
-// ** Renders article column
+// ** Renders social feed column
 const renderArticle = params => {
   const { row } = params
-  const stateNum = Math.floor(Math.random() * 6)
-  const states = ['success', 'error', 'warning', 'info', 'primary', 'secondary']
-  const color = states[stateNum]
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
       <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-        {row.article}
+        {row.headline}
       </Typography>
       <Typography noWrap variant='caption'>
-        {row.shortHeading}
+        {row.publisher}
       </Typography>
-      {/* Displaying the description */}
+      {/* Displaying the summary */}
       <Typography noWrap variant='caption'>
-        {row.description}
+        {row.summary}
       </Typography>
     </Box>
   )
 }
 
 const TableSelection = () => {
-  const columns = [
+  const articleColumns = [
     {
       flex: 0.1,
       minWidth: 5,
       headerName: 'Select',
       field: 'select',
-
       renderCell: params => (
         <Checkbox
           checked={params.row.isSelected}
-          onChange={() => params.api.selectRow(params.row.id, !params.row.isSelected, false)}
+          onChange={() => params.api.selectRow(params.row.articleId, !params.row.isSelected, false)}
           onClick={e => e.stopPropagation()} // Stop propagation to prevent opening the dialog
         />
       )
     },
     {
-      flex: 0.25,
+      flex: 0.4,
       minWidth: 240,
       field: 'article',
       headerName: 'Article',
       renderCell: renderArticle
     },
     {
-      flex: 0.175,
+      flex: 0.11,
       type: 'date',
       minWidth: 30,
-      headerName: 'Issue Date',
+      headerName: 'Date',
       field: 'date',
       valueGetter: params => new Date(params.value),
       renderCell: params => (
         <Typography variant='body2' sx={{ color: 'text.primary' }}>
-          {params.row.date}
+          {new Date(params.row.articleDate).toLocaleDateString()} {/* Format date without time */}
         </Typography>
       )
     },
+
     {
       flex: 0.1,
       minWidth: 5,
@@ -104,7 +102,13 @@ const TableSelection = () => {
   const isNarrowMobileView = useMediaQuery('(max-width: 405px)')
 
   // ** State
-  const [paginationModel, setPaginationModel] = useState({ page: 0, pageSize: 5 })
+  const [articles, setArticles] = useState([])
+
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 10, // Default pageSize
+    totalRecords: 0 // New state for totalRecords
+  })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
   const [selectedEndDate, setSelectedEndDate] = useState(null)
   const [filterPopoverAnchor, setFilterPopoverAnchor] = useState(null)
@@ -112,6 +116,8 @@ const TableSelection = () => {
   const [isSearchBarVisible, setIsSearchBarVisible] = useState(false)
   const [selectedDuration, setSelectedDuration] = useState(null)
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
+  const getRowId = row => row.articleId
+  const [selectedCompanyId, setSelectedCompanyId] = useState(null)
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -122,6 +128,75 @@ const TableSelection = () => {
     // Add logic to save changes to the article
     console.log('Saving changes:', editedArticle)
   }
+
+  // Fetch social feeds based on the provided API
+  const fetchArticles = async () => {
+    try {
+      const storedToken = localStorage.getItem('accessToken')
+      const storedClientId = localStorage.getItem('clientId')
+
+      if (storedToken) {
+        const base_url = 'http://51.68.220.77:8001'
+
+        let startDate = new Date()
+        const currentDate = new Date()
+
+        // Apply duration filter
+        if (selectedDuration) {
+          if (selectedDuration === 1) {
+            startDate.setDate(currentDate.getDate() - 1)
+          } else if (selectedDuration === 7) {
+            startDate.setDate(currentDate.getDate() - selectedDuration)
+          } else if (selectedDuration === 30) {
+            startDate.setMonth(currentDate.getMonth() - 1)
+          }
+        }
+
+        const request_params = {
+          clientIds: [storedClientId],
+          companyIds: selectedCompanyId,
+          fromDate: selectedStartDate?.toISOString() || startDate.toISOString(),
+          toDate: selectedEndDate?.toISOString(),
+          page: 1,
+          recordsPerPage: 100
+        }
+
+        console.log(selectedEndDate?.toISOString() || startDate.toISOString())
+        console.log(selectedEndDate?.toISOString())
+
+        const response = await axios.get(`${base_url}/clientWiseArticles/`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: request_params
+        })
+
+        const totalRecords = response.data.totalRecords || 0
+
+        // Assuming the API response contains socialFeeds
+        setArticles(response.data.articles)
+
+        // Update totalRecords in the state
+        setPaginationModel(prevPagination => ({
+          ...prevPagination,
+          totalRecords
+        }))
+      }
+    } catch (error) {
+      console.error('Error fetching social feeds:', error)
+    }
+  }
+
+  useEffect(() => {
+    fetchArticles()
+  }, [
+    selectedCompanyId,
+    selectedDuration,
+    selectedEndDate,
+    selectedStartDate,
+    paginationModel.page,
+    paginationModel.pageSize
+  ])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -169,9 +244,9 @@ const TableSelection = () => {
     return result
   }, [selectedStartDate, selectedEndDate, searchQuery, selectedDuration])
 
-  // Divide articles into left and right columns
-  const leftArticles = filteredArticles.filter((_, index) => index % 2 === 0)
-  const rightArticles = filteredArticles.filter((_, index) => index % 2 !== 0)
+  // Divide social feeds into left and right columns
+  const leftArticles = articles.filter((_, index) => index % 2 === 0)
+  const rightArticles = articles.filter((_, index) => index % 2 !== 0)
 
   // Open the date filter popover
   const openFilterPopover = event => {
@@ -243,7 +318,7 @@ const TableSelection = () => {
     <Card>
       <CardHeader title='Article Selection' />
       {/* Top Toolbar */}
-      <ToolbarComponent />
+      <ToolbarComponent selectedCompanyId={selectedCompanyId} setSelectedCompanyId={setSelectedCompanyId} />
       {/* Toolbar with Date Filter */}
       <ArticleListToolbar
         setSearchQuery={setSearchQuery}
@@ -274,12 +349,14 @@ const TableSelection = () => {
                 <DataGrid
                   autoHeight
                   rows={leftArticles}
-                  columns={columns}
+                  columns={articleColumns}
                   pageSizeOptions={[5, 10, 50]}
                   paginationModel={paginationModel}
                   onPaginationModelChange={setPaginationModel}
                   onRowClick={params => handleRowClick(params)}
                   hideFooterPagination
+                  getRowId={getRowId}
+                  rowCount={paginationModel.totalRecords}
                 />
               </Box>
             )}
@@ -289,19 +366,21 @@ const TableSelection = () => {
               <DataGrid
                 autoHeight
                 rows={rightArticles}
-                columns={columns}
+                columns={articleColumns}
                 pageSizeOptions={[5, 10, 50]}
                 paginationModel={paginationModel}
                 onPaginationModelChange={setPaginationModel}
                 onRowClick={params => handleRowClick(params)}
+                getRowId={getRowId}
+                rowCount={paginationModel.totalRecords}
               />
             </Box>
           </Box>
         ) : (
           <DataGrid
             autoHeight
-            rows={filteredArticles}
-            columns={columns.filter(column => {
+            rows={articles}
+            columns={articleColumns.filter(column => {
               // Check if it's mobile view and exclude only the "Select" and "Edit" columns
               if (isMobileView) {
                 return (
@@ -317,6 +396,8 @@ const TableSelection = () => {
             paginationModel={paginationModel}
             onPaginationModelChange={setPaginationModel}
             onRowClick={params => handleRowClick(params)}
+            getRowId={getRowId}
+            rowCount={paginationModel.totalRecords}
           />
         )}
       </Box>
@@ -330,7 +411,7 @@ const TableSelection = () => {
       <EditDialog
         open={isEditDialogOpen}
         handleClose={() => setEditDialogOpen(false)}
-        article={selectedArticle}
+        socialFeed={selectedArticle}
         handleSave={handleSaveChanges}
       />
     </Card>

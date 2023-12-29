@@ -16,7 +16,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction='up' ref={ref} {...props} />
 })
 
-export default function ArticleFullScreenDialog({ open, handleClose, article }) {
+export default function SocialFeedFullScreenDialog({ open, handleClose, socialFeed, formattedDate }) {
   return (
     <Dialog fullScreen open={open} onClose={handleClose} TransitionComponent={Transition}>
       <AppBar sx={{ position: 'relative' }}>
@@ -28,7 +28,7 @@ export default function ArticleFullScreenDialog({ open, handleClose, article }) 
             style={{ height: '20px', marginRight: '16px' }}
           /> */}
           <Typography variant='h6' color='inherit'>
-            {article && article.article}
+            {socialFeed && socialFeed.article}
           </Typography>
           <Typography sx={{ ml: 2, flex: 1 }} variant='h6' component='div'></Typography>
           <IconButton edge='start' color='inherit' onClick={handleClose} aria-label='close'>
@@ -46,13 +46,16 @@ export default function ArticleFullScreenDialog({ open, handleClose, article }) 
               {article.article}
             </Typography> */}
             <Typography variant='subtitle1' color='inherit'>
-              Headline: {article && article.shortHeading}
+              Headline: {socialFeed && socialFeed.headline}
             </Typography>
             <Typography variant='subtitle1' color='inherit'>
-              Description: {article && article.description}
+              Publisher: {socialFeed && socialFeed.publisher}
             </Typography>
             <Typography variant='subtitle1' color='inherit'>
-              Date: {article && article.date}
+              Summary: {socialFeed && socialFeed.summary}
+            </Typography>
+            <Typography variant='subtitle1' color='inherit'>
+              Date: {socialFeed && formattedDate}
             </Typography>
           </div>
         </Toolbar>

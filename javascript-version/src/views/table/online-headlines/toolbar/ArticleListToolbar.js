@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -21,6 +21,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import Box from '@mui/material/Box'
 import SvgIcon from '@mui/material/SvgIcon'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import dayjs from 'dayjs' // Import dayjs library
 
 // 1D Icon
 const OneDIcon = props => (
@@ -31,8 +32,8 @@ const OneDIcon = props => (
   </SvgIcon>
 )
 
-// 2D Icon
-const TwoDIcon = props => (
+// 7D Icon
+const SevenDIcon = props => (
   <SvgIcon {...props}>
     <text x='50%' y='50%' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
       7D
@@ -40,8 +41,8 @@ const TwoDIcon = props => (
   </SvgIcon>
 )
 
-// 3D Icon
-const ThreeDIcon = props => (
+// 1M Icon
+const OneMIcon = props => (
   <SvgIcon {...props}>
     <text x='50%' y='50%' fontSize='14px' text-anchor='middle' alignment-baseline='middle'>
       1M
@@ -59,9 +60,6 @@ const ArticleListToolbar = ({
   handleDownload,
   handleRssFeed,
   openFilterPopover,
-  handleFilter1D,
-  handleFilter7D,
-  handleFilter1M,
   filterPopoverAnchor,
   closeFilterPopover,
   selectedStartDate,
@@ -72,11 +70,40 @@ const ArticleListToolbar = ({
 }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
+  // Helper function to calculate date by subtracting days from the current date
+  const calculateDate = days => dayjs().subtract(days, 'day')
+
+  // Function to handle 1D filter
+  const handleFilter1D = () => {
+    const startDate = calculateDate(1)
+    setSelectedStartDate(startDate)
+    setSelectedEndDate(startDate)
+  }
+
+  // Function to handle 7D filter
+  const handleFilter7D = () => {
+    const startDate = calculateDate(7)
+    setSelectedStartDate(startDate)
+    setSelectedEndDate(dayjs()) // Set end date to today
+  }
+
+  // Function to handle 1M filter
+  const handleFilter1M = () => {
+    const startDate = calculateDate(30)
+    setSelectedStartDate(startDate)
+    setSelectedEndDate(dayjs()) // Set end date to today
+  }
+
+  // useEffect to set default date for 1D filter when component mounts
+  useEffect(() => {
+    handleFilter1D()
+  }, []) // Empty dependency array to run the effect only once
+
   return (
     <Toolbar
       sx={{
         display: 'flex',
-        flexWrap: 'wrap' // Allow icons to wrap to a new line when there is not enough horizontal space
+        flexWrap: 'wrap'
       }}
     >
       {!isMobile && (
@@ -117,10 +144,10 @@ const ArticleListToolbar = ({
         <OneDIcon />
       </Button>
       <Button onClick={handleFilter7D} sx={{ color: primaryColor, mr: 0 }}>
-        <TwoDIcon />
+        <SevenDIcon />
       </Button>
       <Button onClick={handleFilter1M} sx={{ color: primaryColor, mr: 0 }}>
-        <ThreeDIcon />
+        <OneMIcon />
       </Button>
       <Popover
         open={Boolean(filterPopoverAnchor)}
