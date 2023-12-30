@@ -124,13 +124,13 @@ const TableSelection = () => {
   const fetchSocialFeeds = async () => {
     try {
       const storedToken = localStorage.getItem('accessToken')
-      const storedClientId = localStorage.getItem('clientId')
-
+      const userData = JSON.parse(localStorage.getItem('userData')) // Parse JSON string to object
+      const storedClientId = userData?.clientId // Access clientId from userData
       if (storedToken) {
         const base_url = 'http://51.68.220.77:8001'
 
         const request_params = {
-          clientIds: [storedClientId],
+          clientIds: storedClientId,
           companyIds: selectedCompanyId,
           fromDate: selectedStartDate?.toISOString(),
           toDate: selectedEndDate?.toISOString(),

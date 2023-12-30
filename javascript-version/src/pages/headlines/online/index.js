@@ -21,15 +21,6 @@ const LinkStyled = styled(Link)(({ theme }) => ({
 const DataGrid = () => {
   return (
     <Grid container spacing={6}>
-      <PageHeader
-        title={
-          <Typography variant='h4'>
-            <LinkStyled href='https://mui.com/x/react-data-grid/' target='_blank'>
-              Online Headlines
-            </LinkStyled>
-          </Typography>
-        }
-      />
       <Grid item xs={12}>
         <ArticleSelection />
       </Grid>

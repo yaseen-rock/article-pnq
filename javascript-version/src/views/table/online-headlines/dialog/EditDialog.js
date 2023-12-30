@@ -6,20 +6,19 @@ import DialogContent from '@mui/material/DialogContent'
 import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
+import Iframe from 'react-iframe'
 
 const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
   const [editedSocialFeed, setEditedSocialFeed] = useState({
     headline: '',
-    publisher: '',
-    summary: ''
+    author: ''
   })
 
   useEffect(() => {
     if (socialFeed) {
       setEditedSocialFeed({
         headline: socialFeed.headline || '',
-        publisher: socialFeed.publisher || '',
-        summary: socialFeed.summary || ''
+        author: socialFeed.socialFeedAuthorName || ''
       })
     }
   }, [socialFeed])
@@ -27,8 +26,7 @@ const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
   const handleDiscard = () => {
     setEditedSocialFeed({
       headline: socialFeed.headline || '',
-      publisher: socialFeed.publisher || '',
-      summary: socialFeed.summary || ''
+      author: socialFeed.socialFeedAuthorName || ''
     })
     handleClose()
   }
@@ -43,7 +41,8 @@ const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
   }
 
   return (
-    <Dialog open={open} onClose={handleClose}>
+    <Dialog open={open} onClose={handleClose} maxWidth='md' fullWidth>
+      {/* Set maxWidth and fullWidth props */}
       <DialogTitle>Edit Social Feed</DialogTitle>
       <DialogContent>
         <TextField
@@ -54,20 +53,20 @@ const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
           margin='normal'
         />
         <TextField
-          label='Publisher'
-          value={editedSocialFeed.publisher}
-          onChange={e => handleInputChange('publisher', e.target.value)}
+          label='Author'
+          value={editedSocialFeed.author}
+          onChange={e => handleInputChange('author', e.target.value)}
           fullWidth
           margin='normal'
         />
-        <TextField
-          label='Summary'
-          value={editedSocialFeed.summary}
-          onChange={e => handleInputChange('summary', e.target.value)}
-          fullWidth
-          multiline
-          rows={4}
-          margin='normal'
+        <Iframe
+          url={socialFeed?.socialFeedlink || ''}
+          width='100%'
+          height='500px'
+          id='myId'
+          className='myClassname'
+          display='initial'
+          position='relative'
         />
       </DialogContent>
       <DialogActions>

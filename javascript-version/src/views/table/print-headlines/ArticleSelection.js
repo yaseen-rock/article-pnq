@@ -12,21 +12,25 @@ import { DataGrid } from '@mui/x-data-grid'
 import Checkbox from '@mui/material/Checkbox'
 
 import ToolbarComponent from './toolbar/ToolbarComponent'
-import ArticleFullScreenDialog from './dialog/ArticleDialog'
-import EditDialog from './dialog/EditDialog'
+import ArticleDialog from './dialog/ArticleDialog'
+import ViewDialog from './dialog/MoreDialog'
 import ArticleListToolbar from './toolbar/ArticleListToolbar'
 
 // ** MUI icons
-import EditIcon from '@mui/icons-material/Edit'
+import MoreVertIcon from '@mui/icons-material/MoreVert'
 
 // ** Article Database
 import { articles } from './Db-Articles'
 
 import useMediaQuery from '@mui/material/useMediaQuery'
 
+import dayjs from 'dayjs'
+
 // ** Renders social feed column
 const renderArticle = params => {
   const { row } = params
+
+  const formattedDate = dayjs(row.articleDate).format('DD-MM-YYYY')
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -35,6 +39,7 @@ const renderArticle = params => {
       </Typography>
       <Typography noWrap variant='caption'>
         {row.publisher}
+        <span style={{ marginLeft: '4px' }}>({formattedDate})</span>
       </Typography>
       {/* Displaying the summary */}
       <Typography noWrap variant='caption'>
@@ -60,31 +65,18 @@ const TableSelection = () => {
       )
     },
     {
-      flex: 0.4,
+      flex: 0.6,
       minWidth: 240,
       field: 'article',
       headerName: 'Article',
       renderCell: renderArticle
     },
-    {
-      flex: 0.11,
-      type: 'date',
-      minWidth: 30,
-      headerName: 'Date',
-      field: 'date',
-      valueGetter: params => new Date(params.value),
-      renderCell: params => (
-        <Typography variant='body2' sx={{ color: 'text.primary' }}>
-          {new Date(params.row.articleDate).toLocaleDateString()} {/* Format date without time */}
-        </Typography>
-      )
-    },
 
     {
       flex: 0.1,
       minWidth: 5,
-      field: 'edit',
-      headerName: 'Edit',
+      field: 'more',
+      headerName: 'More',
       renderCell: params => (
         <IconButton
           onClick={e => {
@@ -92,7 +84,7 @@ const TableSelection = () => {
             handleEdit(params.row)
           }}
         >
-          <EditIcon />
+          <MoreVertIcon />
         </IconButton>
       )
     }
@@ -133,35 +125,22 @@ const TableSelection = () => {
   const fetchArticles = async () => {
     try {
       const storedToken = localStorage.getItem('accessToken')
-      const storedClientId = localStorage.getItem('clientId')
+      const userData = JSON.parse(localStorage.getItem('userData')) // Parse JSON string to object
+      const storedClientId = userData?.clientId // Access clientId from userData
 
       if (storedToken) {
         const base_url = 'http://51.68.220.77:8001'
 
-        let startDate = new Date()
-        const currentDate = new Date()
-
-        // Apply duration filter
-        if (selectedDuration) {
-          if (selectedDuration === 1) {
-            startDate.setDate(currentDate.getDate() - 1)
-          } else if (selectedDuration === 7) {
-            startDate.setDate(currentDate.getDate() - selectedDuration)
-          } else if (selectedDuration === 30) {
-            startDate.setMonth(currentDate.getMonth() - 1)
-          }
-        }
-
         const request_params = {
-          clientIds: [storedClientId],
+          clientIds: storedClientId,
           companyIds: selectedCompanyId,
-          fromDate: selectedStartDate?.toISOString() || startDate.toISOString(),
+          fromDate: selectedStartDate?.toISOString(),
           toDate: selectedEndDate?.toISOString(),
           page: 1,
           recordsPerPage: 100
         }
 
-        console.log(selectedEndDate?.toISOString() || startDate.toISOString())
+        console.log(selectedEndDate?.toISOString())
         console.log(selectedEndDate?.toISOString())
 
         const response = await axios.get(`${base_url}/clientWiseArticles/`, {
@@ -189,14 +168,7 @@ const TableSelection = () => {
 
   useEffect(() => {
     fetchArticles()
-  }, [
-    selectedCompanyId,
-    selectedDuration,
-    selectedEndDate,
-    selectedStartDate,
-    paginationModel.page,
-    paginationModel.pageSize
-  ])
+  }, [selectedCompanyId, selectedEndDate, selectedStartDate, paginationModel.page, paginationModel.pageSize])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -402,13 +374,9 @@ const TableSelection = () => {
         )}
       </Box>
       {/* Popup Window */}
-      <ArticleFullScreenDialog
-        open={isPopupOpen}
-        handleClose={() => setPopupOpen(false)}
-        article={selectedArticle}
-      />{' '}
+      <ArticleDialog open={isPopupOpen} handleClose={() => setPopupOpen(false)} article={selectedArticle} />{' '}
       {/* Edit Dialog */}
-      <EditDialog
+      <ViewDialog
         open={isEditDialogOpen}
         handleClose={() => setEditDialogOpen(false)}
         socialFeed={selectedArticle}

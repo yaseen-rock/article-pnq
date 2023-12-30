@@ -71,7 +71,7 @@ export default function SocialFeedFullScreenDialog({ open, handleClose, socialFe
       </Toolbar>
       <Box p={2}>
         <Iframe
-          url='http://cirrus.co.in/Login_login.action;jsessionid=75495DB4E53E085EB561CFA0BA662188'
+          url={socialFeed?.socialFeedlink || ''}
           width='100%'
           height='500px'
           id='myId'

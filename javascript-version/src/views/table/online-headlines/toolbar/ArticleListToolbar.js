@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import Toolbar from '@mui/material/Toolbar'
 import Typography from '@mui/material/Typography'
 import IconButton from '@mui/material/IconButton'
@@ -21,7 +21,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import Box from '@mui/material/Box'
 import SvgIcon from '@mui/material/SvgIcon'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import dayjs from 'dayjs' // Import dayjs library
+import dayjs from 'dayjs'
 
 // 1D Icon
 const OneDIcon = props => (
@@ -70,6 +70,8 @@ const ArticleListToolbar = ({
 }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
+  const [selectedFilter, setSelectedFilter] = useState('1D')
+
   // Helper function to calculate date by subtracting days from the current date
   const calculateDate = days => dayjs().subtract(days, 'day')
 
@@ -78,6 +80,7 @@ const ArticleListToolbar = ({
     const startDate = calculateDate(1)
     setSelectedStartDate(startDate)
     setSelectedEndDate(startDate)
+    setSelectedFilter('1D')
   }
 
   // Function to handle 7D filter
@@ -85,6 +88,7 @@ const ArticleListToolbar = ({
     const startDate = calculateDate(7)
     setSelectedStartDate(startDate)
     setSelectedEndDate(dayjs()) // Set end date to today
+    setSelectedFilter('7D')
   }
 
   // Function to handle 1M filter
@@ -92,9 +96,10 @@ const ArticleListToolbar = ({
     const startDate = calculateDate(30)
     setSelectedStartDate(startDate)
     setSelectedEndDate(dayjs()) // Set end date to today
+    setSelectedFilter('1M')
   }
 
-  // useEffect to set default date for 1D filter when component mounts
+  // useEffect to set default date for 1D filter and highlight the icon when component mounts
   useEffect(() => {
     handleFilter1D()
   }, []) // Empty dependency array to run the effect only once
@@ -108,7 +113,7 @@ const ArticleListToolbar = ({
     >
       {!isMobile && (
         <Typography variant='h6' sx={{ flex: '1' }}>
-          Article List
+          Feed List
         </Typography>
       )}
       {isSearchBarVisible && (
@@ -140,13 +145,25 @@ const ArticleListToolbar = ({
       <Button onClick={openFilterPopover} sx={{ color: primaryColor, mr: 0 }}>
         <DateRangeIcon />
       </Button>
-      <Button onClick={handleFilter1D} sx={{ color: primaryColor, mr: 0 }}>
+      <Button
+        onClick={handleFilter1D}
+        sx={{ color: primaryColor, mr: 0 }}
+        variant={selectedFilter === '1D' ? 'contained' : 'text'}
+      >
         <OneDIcon />
       </Button>
-      <Button onClick={handleFilter7D} sx={{ color: primaryColor, mr: 0 }}>
+      <Button
+        onClick={handleFilter7D}
+        sx={{ color: primaryColor, mr: 0 }}
+        variant={selectedFilter === '7D' ? 'contained' : 'text'}
+      >
         <SevenDIcon />
       </Button>
-      <Button onClick={handleFilter1M} sx={{ color: primaryColor, mr: 0 }}>
+      <Button
+        onClick={handleFilter1M}
+        sx={{ color: primaryColor, mr: 0 }}
+        variant={selectedFilter === '1M' ? 'contained' : 'text'}
+      >
         <OneMIcon />
       </Button>
       <Popover
