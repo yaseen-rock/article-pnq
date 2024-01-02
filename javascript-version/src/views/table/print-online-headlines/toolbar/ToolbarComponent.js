@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import Toolbar from '@mui/material/Toolbar'
 import Button from '@mui/material/Button'
 import Menu from '@mui/material/Menu'
@@ -7,13 +7,25 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import AppBar from '@mui/material/AppBar'
 import Grid from '@mui/material/Grid'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import axios from 'axios'
 
-const ToolbarComponent = () => {
+const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
   const [geographyAnchor, setGeographyAnchor] = useState(null)
   const [languageAnchor, setLanguageAnchor] = useState(null)
   const [mediaAnchor, setMediaAnchor] = useState(null)
   const [tagsAnchor, setTagsAnchor] = useState(null)
+  const [companies, setCompanies] = useState([])
+  const [languages, setLanguages] = useState({})
+  const [cities, setCities] = useState([])
+
+  const [userData, setUserData] = useState({
+    email: '',
+    fullName: '',
+    clientId: '',
+    clientName: '',
+    role: ''
+  })
 
   const openDropdown = (event, anchorSetter) => {
     anchorSetter(event.currentTarget)
@@ -23,12 +35,58 @@ const ToolbarComponent = () => {
     anchorSetter(null)
   }
 
-  const handleDropdownItemClick = () => {
-    console.log('Dropdown item clicked')
+  const handleDropdownItemClick = companyId => {
+    console.log('Selected Company ID:', companyId)
+    setSelectedCompanyId(companyId)
+    console.log('Updated Selected Company ID:', selectedCompanyId) // Add this line
     closeDropdown(setCompetitionAnchor)
   }
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
+
+  useEffect(() => {
+    const fetchUserDataAndCompanies = async () => {
+      try {
+        const storedUserData = localStorage.getItem('userData')
+        if (storedUserData) {
+          setUserData(JSON.parse(storedUserData))
+        }
+
+        const storedToken = localStorage.getItem('accessToken')
+        if (storedToken && userData.clientId) {
+          const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            },
+            params: {
+              clientId: userData.clientId
+            }
+          })
+          setCompanies(response.data.companies)
+        }
+
+        // Fetch languages
+        const languageResponse = await axios.get('http://51.68.220.77:8001/languagelist/', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        setLanguages(languageResponse.data.languages)
+
+        // Fetch cities
+        const citiesResponse = await axios.get('http://51.68.220.77:8001/citieslist/', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          }
+        })
+        setCities(citiesResponse.data.cities)
+      } catch (error) {
+        console.error('Error fetching user data and companies:', error)
+      }
+    }
+
+    fetchUserDataAndCompanies()
+  }, [userData.clientId])
 
   return (
     <AppBar sx={{ position: 'static' }}>
@@ -114,15 +172,16 @@ const ToolbarComponent = () => {
           </>
         )}
 
-        {/* Dropdown Menus */}
         <Menu
           open={Boolean(competitionAnchor)}
           anchorEl={competitionAnchor}
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {companies.map(company => (
+            <MenuItem key={company.companyId} onClick={() => handleDropdownItemClick(company.companyId)}>
+              {company.companyName}
+            </MenuItem>
+          ))}
         </Menu>
         {/* Geography Dropdown Menu */}
         <Menu
@@ -130,18 +189,21 @@ const ToolbarComponent = () => {
           anchorEl={geographyAnchor}
           onClose={() => closeDropdown(setGeographyAnchor)}
         >
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {cities.map(city => (
+            <MenuItem key={city.cityId} onClick={handleDropdownItemClick}>
+              {city.cityName}
+            </MenuItem>
+          ))}
         </Menu>
 
         {/* Language Dropdown Menu */}
         <Menu open={Boolean(languageAnchor)} anchorEl={languageAnchor} onClose={() => closeDropdown(setLanguageAnchor)}>
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
-          {/* Add more items as needed */}
+          {Object.entries(languages).map(([languageName, languageCode]) => (
+            <MenuItem key={languageCode} onClick={handleDropdownItemClick}>
+              {languageName}
+            </MenuItem>
+          ))}
         </Menu>
-
         {/* Media Dropdown Menu */}
         <Menu open={Boolean(mediaAnchor)} anchorEl={mediaAnchor} onClose={() => closeDropdown(setMediaAnchor)}>
           <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>

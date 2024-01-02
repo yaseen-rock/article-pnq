@@ -379,7 +379,7 @@ const TableSelection = () => {
       <ViewDialog
         open={isEditDialogOpen}
         handleClose={() => setEditDialogOpen(false)}
-        socialFeed={selectedArticle}
+        articles={selectedArticle}
         handleSave={handleSaveChanges}
       />
     </Card>

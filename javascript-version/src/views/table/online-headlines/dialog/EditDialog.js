@@ -7,6 +7,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 import Iframe from 'react-iframe'
+import axios from 'axios'
 
 const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
   const [editedSocialFeed, setEditedSocialFeed] = useState({
@@ -36,8 +37,45 @@ const EditDialog = ({ open, handleClose, socialFeed, handleSave }) => {
   }
 
   const handleSaveChanges = () => {
-    handleSave(editedSocialFeed)
-    handleClose()
+    const { socialFeedId } = socialFeed
+
+    if (socialFeedId) {
+      const storedToken = localStorage.getItem('accessToken')
+
+      if (storedToken) {
+        // Assuming 'author' is a property in 'editedSocialFeed'
+        const { author } = editedSocialFeed
+        const base_url = 'http://51.68.220.77:8001'
+
+        if (author) {
+          // Make the API request using axios
+          axios
+            .post(
+              `${base_url}/updateSocialFeedAuthorName/`,
+              { socialFeedId, newAuthorName: author },
+              {
+                headers: {
+                  Authorization: `Bearer ${storedToken}`
+                }
+              }
+            )
+            .then(response => {
+              console.log(response.data)
+              handleSave(editedSocialFeed)
+              handleClose()
+            })
+            .catch(error => {
+              console.error('Error updating author name:', error)
+            })
+        } else {
+          console.error('Author name is required')
+        }
+      } else {
+        console.error('No access token in the local storage.')
+      }
+    } else {
+      console.error('Invalid socialFeedId')
+    }
   }
 
   return (
