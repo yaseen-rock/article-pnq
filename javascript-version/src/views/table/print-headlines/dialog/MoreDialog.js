@@ -1,6 +1,6 @@
 //MoreDialopg.js
 
-import React from 'react'
+import React, { useState } from 'react'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
 import DialogActions from '@mui/material/DialogActions'
@@ -8,8 +8,12 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import axios from 'axios'
+import FullScreenDialog from './FullScreenDialog'
 
 const ViewDialog = ({ open, handleClose, articles }) => {
+  const [fullScreenOpen, setFullScreenOpen] = useState(false)
+  const [imageSrc, setImageSrc] = useState('')
+
   const fetchReadArticleFile = async fileType => {
     try {
       const storedToken = localStorage.getItem('accessToken')
@@ -33,12 +37,8 @@ const ViewDialog = ({ open, handleClose, articles }) => {
         // Check if the response contains valid content
         if (response.data && response.data.fileContent) {
           if (fileType === 'jpg') {
-            // If fileType is JPG, assume it's base64-encoded image
             const imageSrc = `data:image/jpeg;base64,${response.data.fileContent}`
-
-            // Open a new window and create an img element to display the image
-            const newWindow = window.open()
-            newWindow.document.write(`<img src="${imageSrc}" alt="JPG Image" />`)
+            setImageSrc(imageSrc)
           } else if (fileType === 'pdf') {
             // If fileType is PDF, assume it's base64-encoded PDF
             const pdfSrc = `data:application/pdf;base64,${response.data.fileContent}`
@@ -71,11 +71,20 @@ const ViewDialog = ({ open, handleClose, articles }) => {
   }
 
   const handleViewJPG = () => {
+    // Fetch the JPG file and set the image source
     fetchReadArticleFile('jpg')
+
+    // Open the full-screen dialog when the button is clicked
+    setFullScreenOpen(true)
   }
 
   const handleViewPDF = () => {
     fetchReadArticleFile('pdf')
+  }
+
+  const handleFullScreenClose = () => {
+    setFullScreenOpen(false)
+    setImageSrc('')
   }
 
   return (
@@ -97,6 +106,14 @@ const ViewDialog = ({ open, handleClose, articles }) => {
         <Button onClick={handleViewPDF} color='primary'>
           View PDF
         </Button>
+
+        {/* Render the FullScreenDialog component when open */}
+        <FullScreenDialog
+          open={fullScreenOpen}
+          handleClose={handleFullScreenClose}
+          imageSrc={imageSrc}
+          articles={articles}
+        />
       </DialogActions>
     </Dialog>
   )
