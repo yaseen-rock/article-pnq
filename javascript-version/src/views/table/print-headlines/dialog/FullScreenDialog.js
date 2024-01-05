@@ -10,8 +10,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Box from '@mui/material/Box'
-import Toolbar from '@mui/material/Toolbar'
 import Paper from '@mui/material/Paper'
+import Divider from '@mui/material/Divider'
 
 const FullScreenDialog = ({ open, handleClose, imageSrc, articles }) => {
   const [loading, setLoading] = useState(true)
@@ -30,8 +30,6 @@ const FullScreenDialog = ({ open, handleClose, imageSrc, articles }) => {
 
   useEffect(() => {
     setLoading(true) // Reset loading to true when the dialog is opened
-    // Log articles when the dialog opens
-    console.log('Articles in FullScreenDialog:', articles)
     if (imageSrc) {
       setLoading(false) // Set loading to false when the image source is available
     }
@@ -51,19 +49,19 @@ const FullScreenDialog = ({ open, handleClose, imageSrc, articles }) => {
           <Grid container justifyContent='space-between' alignItems='center'>
             {/* Left side heading */}
             <Grid item>
-              <Typography variant='h7' color='inherit' component='div'>
+              <Typography variant='h7' color='primary' component='div'>
                 {articles.headline}
               </Typography>
             </Grid>
             {/* Right side date */}
             <Grid item>
-              <Typography variant='subtitle1' color='inherit'>
+              <Typography variant='subtitle1' color='primary'>
                 {formattedDate}
               </Typography>
             </Grid>
           </Grid>
         </Paper>
-
+        {/*<Divider sx={{ marginBottom: 2 }} />*/}
         <Grid container spacing={2}>
           {/* Grid for Header Information */}
           <Grid item xs={12} sm={6} md={3}>
@@ -107,12 +105,14 @@ const FullScreenDialog = ({ open, handleClose, imageSrc, articles }) => {
             </Typography>
           </Grid>
         </Grid>
-
+        {/*<Divider sx={{ marginTop: 2 }} />*/}
         {/* Box for Image */}
         <Box mt={2}>
           {/* Conditional rendering of loader */}
           {loading ? (
-            <CircularProgress />
+            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+              <CircularProgress />
+            </div>
           ) : (
             <img src={imageSrc} alt='JPG Image' style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
           )}

@@ -9,10 +9,16 @@ import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import axios from 'axios'
 import FullScreenDialog from './FullScreenDialog'
+import FullScreenHTMLDialog from './FullScreenHTMLDialog'
+import FullScreenPDFDialog from './FullScreenPDFDialog'
 
 const ViewDialog = ({ open, handleClose, articles }) => {
   const [fullScreenOpen, setFullScreenOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState('')
+  const [htmlDialogOpen, setHtmlDialogOpen] = useState(false)
+  const [fileContent, setFileContent] = useState('')
+  const [pdfDialogOpen, setPdfDialogOpen] = useState(false)
+  const [pdfSrc, setPdfSrc] = useState('')
 
   const fetchReadArticleFile = async fileType => {
     try {
@@ -40,22 +46,14 @@ const ViewDialog = ({ open, handleClose, articles }) => {
             const imageSrc = `data:image/jpeg;base64,${response.data.fileContent}`
             setImageSrc(imageSrc)
           } else if (fileType === 'pdf') {
-            // If fileType is PDF, assume it's base64-encoded PDF
             const pdfSrc = `data:application/pdf;base64,${response.data.fileContent}`
-
-            // Open a new window and create an iframe element to display the PDF
-            const newWindow = window.open()
-            newWindow.document.write(
-              `<iframe width="100%" height="100%" src="${pdfSrc}" type="application/pdf"></iframe>`
-            )
+            setPdfSrc(pdfSrc)
           } else if (fileType === 'htm') {
             // If fileType is HTML, assume it's base64-encoded HTML
-            // Decode base64 content
-            const decodedHTML = atob(response.data.fileContent)
+            // Decode base64 content with proper handling of non-ASCII characters
+            const decodedHTML = decodeURIComponent(escape(atob(response.data.fileContent)))
 
-            // Open a new window and write the decoded HTML content
-            const newWindow = window.open()
-            newWindow.document.write(decodedHTML)
+            setFileContent(decodedHTML) // Set the decoded HTML content
           }
         } else {
           console.log('Empty or invalid content in the response.')
@@ -68,6 +66,7 @@ const ViewDialog = ({ open, handleClose, articles }) => {
 
   const handleViewHTML = () => {
     fetchReadArticleFile('htm')
+    setHtmlDialogOpen(true) // Open the HTML full-screen dialog
   }
 
   const handleViewJPG = () => {
@@ -80,11 +79,22 @@ const ViewDialog = ({ open, handleClose, articles }) => {
 
   const handleViewPDF = () => {
     fetchReadArticleFile('pdf')
+    setPdfDialogOpen(true)
   }
 
   const handleFullScreenClose = () => {
     setFullScreenOpen(false)
     setImageSrc('')
+  }
+
+  const handleHtmlDialogClose = () => {
+    setHtmlDialogOpen(false)
+    setFileContent('')
+  }
+
+  const handlePdfDialogClose = () => {
+    setPdfDialogOpen(false)
+    setPdfSrc('')
   }
 
   return (
@@ -114,6 +124,10 @@ const ViewDialog = ({ open, handleClose, articles }) => {
           imageSrc={imageSrc}
           articles={articles}
         />
+        {/* Render the FullScreenHTMLDialog component when open */}
+        <FullScreenHTMLDialog open={htmlDialogOpen} handleClose={handleHtmlDialogClose} fileContent={fileContent} />
+        {/* Render the FullScreenPDFDialog component when open */}
+        <FullScreenPDFDialog open={pdfDialogOpen} handleClose={handlePdfDialogClose} pdfSrc={pdfSrc} />
       </DialogActions>
     </Dialog>
   )
