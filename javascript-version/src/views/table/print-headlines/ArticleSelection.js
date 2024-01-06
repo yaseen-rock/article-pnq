@@ -137,13 +137,13 @@ const TableSelection = () => {
           fromDate: selectedStartDate?.toISOString(),
           toDate: selectedEndDate?.toISOString(),
           page: 1,
-          recordsPerPage: 100
+          recordsPerPage: 10
         }
 
         console.log(selectedEndDate?.toISOString())
         console.log(selectedEndDate?.toISOString())
 
-        const response = await axios.get(`${base_url}/clientWiseArticles/`, {
+        const response = await axios.get(`${base_url}/clientWisePrintArticles/`, {
           headers: {
             Authorization: `Bearer ${storedToken}`
           },
@@ -154,6 +154,7 @@ const TableSelection = () => {
 
         // Assuming the API response contains socialFeeds
         setArticles(response.data.articles)
+        console.log(response.data.articles)
 
         // Update totalRecords in the state
         setPaginationModel(prevPagination => ({

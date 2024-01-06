@@ -1,4 +1,4 @@
-//MoreDialopg.js
+//MoreDialog.js
 
 import React, { useState } from 'react'
 import Dialog from '@mui/material/Dialog'
@@ -8,12 +8,12 @@ import Button from '@mui/material/Button'
 import IconButton from '@mui/material/IconButton'
 import CloseIcon from '@mui/icons-material/Close'
 import axios from 'axios'
-import FullScreenDialog from './FullScreenDialog'
+import FullScreenJPGDialog from './FullScreenJPGDialog'
 import FullScreenHTMLDialog from './FullScreenHTMLDialog'
 import FullScreenPDFDialog from './FullScreenPDFDialog'
 
 const ViewDialog = ({ open, handleClose, articles }) => {
-  const [fullScreenOpen, setFullScreenOpen] = useState(false)
+  const [jpgDialogOpen, setJpgDialogOpen] = useState(false)
   const [imageSrc, setImageSrc] = useState('')
   const [htmlDialogOpen, setHtmlDialogOpen] = useState(false)
   const [fileContent, setFileContent] = useState('')
@@ -64,6 +64,8 @@ const ViewDialog = ({ open, handleClose, articles }) => {
     }
   }
 
+  const handleEditDetail = () => {}
+
   const handleViewHTML = () => {
     fetchReadArticleFile('htm')
     setHtmlDialogOpen(true) // Open the HTML full-screen dialog
@@ -74,7 +76,7 @@ const ViewDialog = ({ open, handleClose, articles }) => {
     fetchReadArticleFile('jpg')
 
     // Open the full-screen dialog when the button is clicked
-    setFullScreenOpen(true)
+    setJpgDialogOpen(true)
   }
 
   const handleViewPDF = () => {
@@ -82,8 +84,8 @@ const ViewDialog = ({ open, handleClose, articles }) => {
     setPdfDialogOpen(true)
   }
 
-  const handleFullScreenClose = () => {
-    setFullScreenOpen(false)
+  const handleJpgDialogClose = () => {
+    setJpgDialogOpen(false)
     setImageSrc('')
   }
 
@@ -116,18 +118,31 @@ const ViewDialog = ({ open, handleClose, articles }) => {
         <Button onClick={handleViewPDF} color='primary'>
           View PDF
         </Button>
+        <Button onClick={handleEditDetail} color='primary'>
+          Edit Detail
+        </Button>
 
         {/* Render the FullScreenDialog component when open */}
-        <FullScreenDialog
-          open={fullScreenOpen}
-          handleClose={handleFullScreenClose}
+        <FullScreenJPGDialog
+          open={jpgDialogOpen}
+          handleClose={handleJpgDialogClose}
           imageSrc={imageSrc}
           articles={articles}
         />
         {/* Render the FullScreenHTMLDialog component when open */}
-        <FullScreenHTMLDialog open={htmlDialogOpen} handleClose={handleHtmlDialogClose} fileContent={fileContent} />
+        <FullScreenHTMLDialog
+          open={htmlDialogOpen}
+          handleClose={handleHtmlDialogClose}
+          fileContent={fileContent}
+          articles={articles}
+        />
         {/* Render the FullScreenPDFDialog component when open */}
-        <FullScreenPDFDialog open={pdfDialogOpen} handleClose={handlePdfDialogClose} pdfSrc={pdfSrc} />
+        <FullScreenPDFDialog
+          open={pdfDialogOpen}
+          handleClose={handlePdfDialogClose}
+          pdfSrc={pdfSrc}
+          articles={articles}
+        />
       </DialogActions>
     </Dialog>
   )

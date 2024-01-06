@@ -6,8 +6,9 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
+import PublicationInfo from './PublicationInfo'
 
-const FullScreenHTMLDialog = ({ open, handleClose, fileContent }) => {
+const FullScreenHTMLDialog = ({ open, handleClose, fileContent, articles }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -20,9 +21,7 @@ const FullScreenHTMLDialog = ({ open, handleClose, fileContent }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
       <DialogContent>
-        <Typography variant='h6' color='inherit'>
-          HTML Content
-        </Typography>
+        <PublicationInfo articles={articles} />
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <CircularProgress />

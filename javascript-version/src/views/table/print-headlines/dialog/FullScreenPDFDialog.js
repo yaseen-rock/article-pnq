@@ -6,8 +6,9 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import CircularProgress from '@mui/material/CircularProgress'
 import Typography from '@mui/material/Typography'
+import PublicationInfo from './PublicationInfo'
 
-const FullScreenPDFDialog = ({ open, handleClose, pdfSrc }) => {
+const FullScreenPDFDialog = ({ open, handleClose, pdfSrc, articles }) => {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -21,9 +22,7 @@ const FullScreenPDFDialog = ({ open, handleClose, pdfSrc }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
       <DialogContent>
-        <Typography variant='h6' color='inherit'>
-          PDF Content
-        </Typography>
+        <PublicationInfo articles={articles} />
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
             <CircularProgress />
