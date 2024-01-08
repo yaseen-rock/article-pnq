@@ -11,6 +11,7 @@ import axios from 'axios'
 import FullScreenJPGDialog from './FullScreenJPGDialog'
 import FullScreenHTMLDialog from './FullScreenHTMLDialog'
 import FullScreenPDFDialog from './FullScreenPDFDialog'
+import FullScreenEditDetailsDialog from './FullScreenEditDetailsDialog'
 
 const ViewDialog = ({ open, handleClose, articles }) => {
   const [jpgDialogOpen, setJpgDialogOpen] = useState(false)
@@ -19,6 +20,7 @@ const ViewDialog = ({ open, handleClose, articles }) => {
   const [fileContent, setFileContent] = useState('')
   const [pdfDialogOpen, setPdfDialogOpen] = useState(false)
   const [pdfSrc, setPdfSrc] = useState('')
+  const [editDetailsDialogOpen, setEditDetailsDialogOpen] = useState(false)
 
   const fetchReadArticleFile = async fileType => {
     try {
@@ -64,7 +66,14 @@ const ViewDialog = ({ open, handleClose, articles }) => {
     }
   }
 
-  const handleEditDetail = () => {}
+  const handleEditDetail = () => {
+    setEditDetailsDialogOpen(true)
+  }
+
+  const handleEditDetailsDialogClose = () => {
+    // Close the edit details dialog
+    setEditDetailsDialogOpen(false)
+  }
 
   const handleViewHTML = () => {
     fetchReadArticleFile('htm')
@@ -141,6 +150,11 @@ const ViewDialog = ({ open, handleClose, articles }) => {
           open={pdfDialogOpen}
           handleClose={handlePdfDialogClose}
           pdfSrc={pdfSrc}
+          articles={articles}
+        />
+        <FullScreenEditDetailsDialog
+          open={editDetailsDialogOpen}
+          handleClose={handleEditDetailsDialogClose}
           articles={articles}
         />
       </DialogActions>
