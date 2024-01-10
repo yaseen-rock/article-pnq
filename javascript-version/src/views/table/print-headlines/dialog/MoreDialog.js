@@ -67,12 +67,13 @@ const ViewDialog = ({ open, handleClose, articles }) => {
   }
 
   const handleEditDetail = () => {
+    fetchReadArticleFile('jpg')
     setEditDetailsDialogOpen(true)
   }
 
   const handleEditDetailsDialogClose = () => {
-    // Close the edit details dialog
     setEditDetailsDialogOpen(false)
+    setImageSrc('')
   }
 
   const handleViewHTML = () => {
@@ -156,6 +157,7 @@ const ViewDialog = ({ open, handleClose, articles }) => {
           open={editDetailsDialogOpen}
           handleClose={handleEditDetailsDialogClose}
           articles={articles}
+          imageSrc={imageSrc}
         />
       </DialogActions>
     </Dialog>

@@ -47,43 +47,68 @@ const PublicationInfo = ({ articles }) => {
       <Grid container spacing={2}>
         {/* Grid for Header Information */}
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Media Type:</strong> {publicationInfo.mediaType}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Media Type:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.mediaType}
+          </Typography>
+        </Grid>
+
+        <Grid item xs={12} sm={6} md={3}>
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Publication Type:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.publicationType}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Publication Type:</strong> {publicationInfo.publicationType}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Publication:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.publication}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Publication:</strong> {publicationInfo.publication}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Language:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.language}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Language:</strong> {publicationInfo.language}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Page Number:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.pageNumber}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Page Number:</strong> {publicationInfo.pageNumber}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Size:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.size}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Size:</strong> {publicationInfo.size}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Circulation:
+          </Typography>
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.circulation}
           </Typography>
         </Grid>
         <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Circulation:</strong> {publicationInfo.circulation}
+          <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
+            Edition:
           </Typography>
-        </Grid>
-        <Grid item xs={12} sm={6} md={3}>
-          <Typography variant='body2' color='textSecondary'>
-            <strong>Edition:</strong> {publicationInfo.edition}
+          <Typography variant='body2' color='textSecondary' style={{ display: 'inline', marginLeft: '4px' }}>
+            {publicationInfo.edition}
           </Typography>
         </Grid>
       </Grid>
