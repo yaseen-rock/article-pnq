@@ -7,6 +7,7 @@ import Button from '@mui/material/Button'
 import Typography from '@mui/material/Typography'
 import CircularProgress from '@mui/material/CircularProgress'
 import PublicationInfo from './PublicationInfo'
+import PublicationLogo from './PublicationLogo'
 
 const FullScreenHTMLDialog = ({ open, handleClose, fileContent, articles }) => {
   const [loading, setLoading] = useState(true)
@@ -21,6 +22,7 @@ const FullScreenHTMLDialog = ({ open, handleClose, fileContent, articles }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
       <DialogContent>
+        <PublicationLogo articles={articles} />
         <PublicationInfo articles={articles} />
         {loading ? (
           <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>

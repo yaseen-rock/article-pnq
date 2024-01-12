@@ -26,7 +26,7 @@ const EditJournalist = ({ articles, onSave, onCancel }) => {
       </Typography>
       <Grid container spacing={2} sx={{ marginTop: 2 }}>
         {/* Grid for Article Data */}
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={8}>
           <TextField
             fullWidth
             label='Headline'
@@ -35,7 +35,7 @@ const EditJournalist = ({ articles, onSave, onCancel }) => {
             onChange={e => handleInputChange('headline', e.target.value)}
           />
         </Grid>
-        <Grid item xs={12} sm={6}>
+        <Grid item xs={12} sm={4}>
           <TextField
             fullWidth
             label='Journalist'

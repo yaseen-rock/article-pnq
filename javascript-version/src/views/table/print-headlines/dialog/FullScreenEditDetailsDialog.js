@@ -30,10 +30,13 @@ const FullScreenEditDetailsDialog = ({ open, handleClose, imageSrc, articles }) 
       </IconButton>
 
       <DialogContent>
-        <PublicationLogo articles={articles} />
-        <PublicationInfo articles={articles} />
-        <EditJournalist articles={articles} />
-        <ArticleTagEdit articles={articles} handleClose={handleClose} />
+        <Box border={1} borderColor='grey.300' borderRadius={4} p={3} mt={2}>
+          {/* Wrap the components inside the Box */}
+          <PublicationLogo articles={articles} />
+          <PublicationInfo articles={articles} />
+          <EditJournalist articles={articles} />
+          <ArticleTagEdit articles={articles} handleClose={handleClose} />
+        </Box>
 
         <Box mt={2}>
           {/* Conditional rendering of loader */}

@@ -257,11 +257,6 @@ const TableSelection = () => {
     console.log('Search action triggered')
   }
 
-  const handleDownload = () => {
-    // Add your search logic here
-    console.log('Search action triggered')
-  }
-
   const handleRssFeed = () => {
     // Add your search logic here
     console.log('Search action triggered')
@@ -300,7 +295,6 @@ const TableSelection = () => {
         handleDelete={handleDelete}
         handleEmail={handleEmail}
         handleImage={handleImage}
-        handleDownload={handleDownload}
         handleRssFeed={handleRssFeed}
         openFilterPopover={openFilterPopover}
         handleFilter1D={handleFilter1D}

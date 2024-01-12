@@ -82,10 +82,7 @@ const ViewDialog = ({ open, handleClose, articles }) => {
   }
 
   const handleViewJPG = () => {
-    // Fetch the JPG file and set the image source
     fetchReadArticleFile('jpg')
-
-    // Open the full-screen dialog when the button is clicked
     setJpgDialogOpen(true)
   }
 

@@ -22,7 +22,8 @@ import Box from '@mui/material/Box'
 import SvgIcon from '@mui/material/SvgIcon'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import dayjs from 'dayjs'
-import AdvancedSearchForm from '../dialog/AdvancedSearchForm'
+import AdvancedSearchForm from '../dialog/advanceSearch/AdvancedSearchForm'
+import DownloadDialog from '../dialog/dossierDownload/DownloadDialog'
 import Tooltip from '@mui/material/Tooltip'
 
 // Advanced Search Icon
@@ -145,7 +146,6 @@ const ArticleListToolbar = ({
   handleDelete,
   handleEmail,
   handleImage,
-  handleDownload,
   handleRssFeed,
   openFilterPopover,
   filterPopoverAnchor,
@@ -202,6 +202,16 @@ const ArticleListToolbar = ({
     setAdvancedSearchOpen(false)
   }
 
+  const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false)
+
+  const handleDownloadDialogOpen = () => {
+    setDownloadDialogOpen(true)
+  }
+
+  const handleDownloadDialogClose = () => {
+    setDownloadDialogOpen(false)
+  }
+
   return (
     <Toolbar
       sx={{
@@ -240,9 +250,13 @@ const ArticleListToolbar = ({
       <Button onClick={handleImage} sx={{ color: primaryColor, mr: 0 }}>
         <ImageIcon />
       </Button>
-      <Button onClick={handleDownload} sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleDownloadDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <DownloadIcon />
       </Button>
+
+      {/* Add the DownloadDialog component */}
+      <DownloadDialog open={downloadDialogOpen} handleClose={handleDownloadDialogClose} />
+
       <Button sx={{ color: primaryColor, mr: 0 }}>
         <ExcelDumpIcon />
       </Button>

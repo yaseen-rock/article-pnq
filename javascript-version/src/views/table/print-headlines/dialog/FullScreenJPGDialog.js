@@ -9,6 +9,7 @@ import CircularProgress from '@mui/material/CircularProgress'
 import Box from '@mui/material/Box'
 import Divider from '@mui/material/Divider'
 import PublicationInfo from './PublicationInfo'
+import PublicationLogo from './PublicationLogo'
 
 const FullScreenJPGDialog = ({ open, handleClose, imageSrc, articles }) => {
   const [loading, setLoading] = useState(true)
@@ -23,6 +24,7 @@ const FullScreenJPGDialog = ({ open, handleClose, imageSrc, articles }) => {
   return (
     <Dialog open={open} onClose={handleClose} maxWidth='xl' fullWidth>
       <DialogContent>
+        <PublicationLogo articles={articles} />
         {/* Render the PublicationInfo component and pass the articles prop */}
         <PublicationInfo articles={articles} />
 
