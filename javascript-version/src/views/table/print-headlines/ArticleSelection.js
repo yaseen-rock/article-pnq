@@ -1,6 +1,5 @@
 // ** React Import
 import { useState, useMemo, useEffect } from 'react'
-import axios from 'axios'
 
 // ** MUI Imports
 import Box from '@mui/material/Box'
@@ -10,21 +9,18 @@ import CardHeader from '@mui/material/CardHeader'
 import IconButton from '@mui/material/IconButton'
 import { DataGrid } from '@mui/x-data-grid'
 import Checkbox from '@mui/material/Checkbox'
-
 import ToolbarComponent from './toolbar/ToolbarComponent'
 import ArticleDialog from './dialog/ArticleDialog'
-import ViewDialog from './dialog/MoreDialog'
+import ViewDialog from './dialog/view/MoreDialog'
 import ArticleListToolbar from './toolbar/ArticleListToolbar'
 
 // ** MUI icons
 import MoreVertIcon from '@mui/icons-material/MoreVert'
-
-// ** Article Database
-import { articles } from './Db-Articles'
-
 import useMediaQuery from '@mui/material/useMediaQuery'
-
 import dayjs from 'dayjs'
+
+//api call
+import { fetchArticles } from '../../../api/print-headlines/articleApi'
 
 // ** Renders social feed column
 const renderArticle = params => {
@@ -58,9 +54,10 @@ const TableSelection = () => {
       field: 'select',
       renderCell: params => (
         <Checkbox
-          checked={params.row.isSelected}
-          onChange={() => params.api.selectRow(params.row.articleId, !params.row.isSelected, false)}
-          onClick={e => e.stopPropagation()} // Stop propagation to prevent opening the dialog
+          onClick={e => {
+            e.stopPropagation()
+            handleSelect(params.row)
+          }}
         />
       )
     },
@@ -89,6 +86,7 @@ const TableSelection = () => {
       )
     }
   ]
+
   const isNotResponsive = useMediaQuery('(min-width: 1000px )')
   const isMobileView = useMediaQuery('(max-width: 530px)')
   const isNarrowMobileView = useMediaQuery('(max-width: 405px)')
@@ -122,54 +120,38 @@ const TableSelection = () => {
   }
 
   // Fetch social feeds based on the provided API
-  const fetchArticles = async () => {
+  const fetchArticlesApi = async () => {
     try {
       const storedToken = localStorage.getItem('accessToken')
-      const userData = JSON.parse(localStorage.getItem('userData')) // Parse JSON string to object
-      const storedClientId = userData?.clientId // Access clientId from userData
+      const userData = JSON.parse(localStorage.getItem('userData'))
+      const storedClientId = userData?.clientId
 
       if (storedToken) {
-        const base_url = 'http://51.68.220.77:8001'
-
-        const request_params = {
+        const response = await fetchArticles({
           clientIds: storedClientId,
           companyIds: selectedCompanyId,
-          fromDate: selectedStartDate?.toISOString(),
-          toDate: selectedEndDate?.toISOString(),
+          fromDate: selectedStartDate,
+          toDate: selectedEndDate,
           page: 1,
           recordsPerPage: 10
-        }
-
-        console.log(selectedEndDate?.toISOString())
-        console.log(selectedEndDate?.toISOString())
-
-        const response = await axios.get(`${base_url}/clientWisePrintArticles/`, {
-          headers: {
-            Authorization: `Bearer ${storedToken}`
-          },
-          params: request_params
         })
 
-        const totalRecords = response.data.totalRecords || 0
+        const totalRecords = response.totalRecords || 0
+        setArticles(response.articles)
 
-        // Assuming the API response contains socialFeeds
-        setArticles(response.data.articles)
-        console.log(response.data.articles)
-
-        // Update totalRecords in the state
         setPaginationModel(prevPagination => ({
           ...prevPagination,
           totalRecords
         }))
       }
     } catch (error) {
-      console.error('Error fetching social feeds:', error)
+      console.error('Error fetching articles:', error)
     }
   }
 
   useEffect(() => {
-    fetchArticles()
-  }, [selectedCompanyId, selectedEndDate, selectedStartDate, paginationModel.page, paginationModel.pageSize])
+    fetchArticlesApi()
+  }, [selectedCompanyId, selectedEndDate, selectedStartDate])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -194,28 +176,8 @@ const TableSelection = () => {
       )
     }
 
-    // Apply duration filter
-    if (selectedDuration) {
-      const currentDate = new Date()
-      const startDate = new Date(currentDate)
-
-      if (selectedDuration === 1) {
-        startDate.setDate(currentDate.getDate() - 1)
-      } else if (selectedDuration === 7) {
-        startDate.setDate(currentDate.getDate() - selectedDuration)
-      } else if (selectedDuration === 30) {
-        startDate.setMonth(currentDate.getMonth() - 1)
-      }
-
-      result = result.filter(article => {
-        const articleDate = new Date(article.date)
-
-        return articleDate >= startDate && articleDate <= currentDate
-      })
-    }
-
     return result
-  }, [selectedStartDate, selectedEndDate, searchQuery, selectedDuration])
+  }, [searchQuery])
 
   // Divide social feeds into left and right columns
   const leftArticles = articles.filter((_, index) => index % 2 === 0)
@@ -252,11 +214,6 @@ const TableSelection = () => {
     console.log('Search action triggered')
   }
 
-  const handleImage = () => {
-    // Add your search logic here
-    console.log('Search action triggered')
-  }
-
   const handleRssFeed = () => {
     // Add your search logic here
     console.log('Search action triggered')
@@ -282,6 +239,24 @@ const TableSelection = () => {
     setPopupOpen(true)
   }
 
+  const [selectedArticles, setSelectedArticles] = useState([])
+
+  const handleSelect = article => {
+    // Check if the article is already selected
+    const isSelected = selectedArticles.some(selectedArticle => selectedArticle.articleId === article.articleId)
+
+    // Update selectedArticles based on whether the article is already selected or not
+    setSelectedArticles(prevSelectedArticles => {
+      if (isSelected) {
+        // If article is already selected, remove it from the selection
+        return prevSelectedArticles.filter(selectedArticle => selectedArticle.articleId !== article.articleId)
+      } else {
+        // If article is not selected, add it to the selection
+        return [...prevSelectedArticles, article]
+      }
+    })
+  }
+
   return (
     <Card>
       <CardHeader title='Article Selection' />
@@ -294,7 +269,6 @@ const TableSelection = () => {
         toggleSearchBarVisibility={toggleSearchBarVisibility}
         handleDelete={handleDelete}
         handleEmail={handleEmail}
-        handleImage={handleImage}
         handleRssFeed={handleRssFeed}
         openFilterPopover={openFilterPopover}
         handleFilter1D={handleFilter1D}
@@ -306,6 +280,7 @@ const TableSelection = () => {
         setSelectedStartDate={setSelectedStartDate}
         selectedEndDate={selectedEndDate}
         setSelectedEndDate={setSelectedEndDate}
+        selectedArticles={selectedArticles}
       />
       {/* DataGrid */}
       <Box p={2}>

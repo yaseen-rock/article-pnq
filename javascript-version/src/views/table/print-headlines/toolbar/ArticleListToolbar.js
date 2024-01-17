@@ -22,9 +22,12 @@ import Box from '@mui/material/Box'
 import SvgIcon from '@mui/material/SvgIcon'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import dayjs from 'dayjs'
+import Tooltip from '@mui/material/Tooltip'
 import AdvancedSearchForm from '../dialog/advanceSearch/AdvancedSearchForm'
 import DownloadDialog from '../dialog/dossierDownload/DownloadDialog'
-import Tooltip from '@mui/material/Tooltip'
+import ExcelDumpDialog from '../dialog/ExcelDump/ExcelDumpDialog'
+import TaggingDialog from '../dialog/tagging/TaggingDialog'
+import ImageDialog from '../dialog/image/ImageDialog'
 
 // Advanced Search Icon
 const AdvancedSearchIcon = () => (
@@ -145,7 +148,6 @@ const ArticleListToolbar = ({
   toggleSearchBarVisibility,
   handleDelete,
   handleEmail,
-  handleImage,
   handleRssFeed,
   openFilterPopover,
   filterPopoverAnchor,
@@ -154,7 +156,8 @@ const ArticleListToolbar = ({
   setSelectedStartDate,
   selectedEndDate,
   setSelectedEndDate,
-  primaryColor
+  primaryColor,
+  selectedArticles
 }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
@@ -212,6 +215,36 @@ const ArticleListToolbar = ({
     setDownloadDialogOpen(false)
   }
 
+  const [excelDumpDialogOpen, setExcelDumpDialogOpen] = React.useState(false)
+
+  const handleExcelDumpDialogOpen = () => {
+    setExcelDumpDialogOpen(true)
+  }
+
+  const handleExcelDumpDialogClose = () => {
+    setExcelDumpDialogOpen(false)
+  }
+
+  const [taggingDialogOpen, setTaggingDialogOpen] = useState(false)
+
+  const handleTaggingDialogOpen = () => {
+    setTaggingDialogOpen(true)
+  }
+
+  const handleTaggingDialogClose = () => {
+    setTaggingDialogOpen(false)
+  }
+
+  const [isImageDialogOpen, setImageDialogOpen] = useState(false)
+
+  const handleImageDialogOpen = () => {
+    setImageDialogOpen(true)
+  }
+
+  const handleImageDialogClose = () => {
+    setImageDialogOpen(false)
+  }
+
   return (
     <Toolbar
       sx={{
@@ -247,9 +280,13 @@ const ArticleListToolbar = ({
           <EmailIcon />
         </Button>
       </Tooltip>
-      <Button onClick={handleImage} sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleImageDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <ImageIcon />
       </Button>
+
+      {/* Add the ImageDialog component */}
+      <ImageDialog open={isImageDialogOpen} handleClose={handleImageDialogClose} selectedArticles={selectedArticles} />
+
       <Button onClick={handleDownloadDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <DownloadIcon />
       </Button>
@@ -257,15 +294,22 @@ const ArticleListToolbar = ({
       {/* Add the DownloadDialog component */}
       <DownloadDialog open={downloadDialogOpen} handleClose={handleDownloadDialogClose} />
 
-      <Button sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleExcelDumpDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <ExcelDumpIcon />
       </Button>
+
+      {/* Add the ExcelDumpDialog component */}
+      <ExcelDumpDialog open={excelDumpDialogOpen} handleClose={handleExcelDumpDialogClose} />
+
       <Button onClick={handleRssFeed} sx={{ color: primaryColor, mr: 0 }}>
         <RssFeedIcon />
       </Button>
-      <Button sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleTaggingDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <TaggingIcon />
       </Button>
+      {/* Render the TaggingDialog with the open state and onClose function */}
+      <TaggingDialog open={taggingDialogOpen} onClose={handleTaggingDialogClose} />
+
       <Button sx={{ color: primaryColor, mr: 0 }}>
         <SortByIcon />
       </Button>

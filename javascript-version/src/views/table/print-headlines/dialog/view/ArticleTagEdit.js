@@ -1,3 +1,4 @@
+// src/components/print-headlines/dialog/views/ArticleTagEdit.js
 import React, { useState } from 'react'
 import Typography from '@mui/material/Typography'
 import Paper from '@mui/material/Paper'
@@ -9,7 +10,7 @@ import TableBody from '@mui/material/TableBody'
 import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableRow from '@mui/material/TableRow'
-import axios from 'axios' // Import Axios for making HTTP requests
+import { updateClientTagsToCompany } from '../../../../../api/print-headlines/dialog/view/articleTagEditApi'
 
 const ArticleTagEdit = ({ articles, handleClose, token }) => {
   const [tags, setTags] = useState(articles.tags || [])
@@ -23,11 +24,8 @@ const ArticleTagEdit = ({ articles, handleClose, token }) => {
   const handleSaveDetails = async () => {
     try {
       const storedToken = localStorage.getItem('accessToken')
-
-      const url = `http://51.68.220.77:8001/updateClientTagsToCompany/`
       const clientId = articles.clientId
 
-      // Filter out companies without tags
       const companiesWithTags = articles.companies.filter((company, companyIndex) => {
         const clientTags = tags[companyIndex]
 
@@ -37,18 +35,13 @@ const ArticleTagEdit = ({ articles, handleClose, token }) => {
       const promises = companiesWithTags.map((company, companyIndex) => {
         const companyId = company.id
         const clientTags = tags[companyIndex] ? Object.values(tags[companyIndex]) : []
-        const requestData = { clientId, companyId, clientTags }
-        console.log(clientId, companyId, clientTags)
 
-        return axios.post(url, requestData, {
-          headers: { Authorization: `Bearer ${storedToken}` }
-        })
+        return updateClientTagsToCompany(clientId, companyId, clientTags, storedToken)
       })
 
       const responses = await Promise.all(promises)
-
       responses.forEach(response => {
-        console.log(response.data)
+        console.log(response)
       })
     } catch (error) {
       console.error('Error saving tags:', error)
