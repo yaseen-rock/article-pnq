@@ -17,6 +17,7 @@ export const fetchArticles = async ({ clientIds, companyIds, fromDate, toDate, p
     }
     console.log(fromDate?.toISOString())
     console.log(toDate?.toISOString())
+    console.log(page)
 
     const response = await axios.get(`${base_url}/clientWisePrintArticles/`, {
       headers: {

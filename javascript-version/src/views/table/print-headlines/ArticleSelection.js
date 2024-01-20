@@ -22,6 +22,11 @@ import dayjs from 'dayjs'
 //api call
 import { fetchArticles } from '../../../api/print-headlines/articleApi'
 
+//pagination
+import Pagination from './Pagination'
+
+import CircularProgress from '@mui/material/CircularProgress'
+
 // ** Renders social feed column
 const renderArticle = params => {
   const { row } = params
@@ -96,7 +101,7 @@ const TableSelection = () => {
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 10, // Default pageSize
+    pageSize: 0, // Default pageSize
     totalRecords: 0 // New state for totalRecords
   })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
@@ -108,6 +113,8 @@ const TableSelection = () => {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const getRowId = row => row.articleId
   const [selectedCompanyId, setSelectedCompanyId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [recordsPerPage, setRecordsPerPage] = useState(10)
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -119,9 +126,12 @@ const TableSelection = () => {
     console.log('Saving changes:', editedArticle)
   }
 
+  const [loading, setLoading] = useState(true)
+
   // Fetch social feeds based on the provided API
   const fetchArticlesApi = async () => {
     try {
+      setLoading(true)
       const storedToken = localStorage.getItem('accessToken')
       const userData = JSON.parse(localStorage.getItem('userData'))
       const storedClientId = userData?.clientId
@@ -132,11 +142,11 @@ const TableSelection = () => {
           companyIds: selectedCompanyId,
           fromDate: selectedStartDate,
           toDate: selectedEndDate,
-          page: 1,
-          recordsPerPage: 10
+          page: currentPage,
+          recordsPerPage: recordsPerPage
         })
 
-        const totalRecords = response.totalRecords || 0
+        const totalRecords = response.totalRecords
         setArticles(response.articles)
 
         setPaginationModel(prevPagination => ({
@@ -146,12 +156,14 @@ const TableSelection = () => {
       }
     } catch (error) {
       console.error('Error fetching articles:', error)
+    } finally {
+      setLoading(false) // Set loading to false after API call is complete
     }
   }
 
   useEffect(() => {
     fetchArticlesApi()
-  }, [selectedCompanyId, selectedEndDate, selectedStartDate])
+  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -257,6 +269,25 @@ const TableSelection = () => {
     })
   }
 
+  const handleLeftPagination = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1)
+    }
+  }
+
+  // Function to handle right pagination
+  const handleRightPagination = () => {
+    if (currentPage < Math.ceil(paginationModel.totalRecords / paginationModel.pageSize)) {
+      setCurrentPage(prevPage => prevPage + 1)
+    }
+  }
+
+  const handleRecordsPerPageChange = event => {
+    const newRecordsPerPage = parseInt(event.target.value, 10)
+    setRecordsPerPage(newRecordsPerPage)
+    setCurrentPage(1) // Reset current page when changing records per page
+  }
+
   return (
     <Card>
       <CardHeader title='Article Selection' />
@@ -284,63 +315,75 @@ const TableSelection = () => {
       />
       {/* DataGrid */}
       <Box p={2}>
-        {isNotResponsive ? (
-          <Box display='flex'>
-            {isMobileView ? null : (
-              <Box flex='1' p={2} pr={1}>
-                <DataGrid
-                  autoHeight
-                  rows={leftArticles}
-                  columns={articleColumns}
-                  pageSizeOptions={[5, 10, 50]}
-                  paginationModel={paginationModel}
-                  onPaginationModelChange={setPaginationModel}
-                  onRowClick={params => handleRowClick(params)}
-                  hideFooterPagination
-                  getRowId={getRowId}
-                  rowCount={paginationModel.totalRecords}
-                />
-              </Box>
-            )}
-
-            {/* Right Column */}
-            <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
-              <DataGrid
-                autoHeight
-                rows={rightArticles}
-                columns={articleColumns}
-                pageSizeOptions={[5, 10, 50]}
-                paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
-                onRowClick={params => handleRowClick(params)}
-                getRowId={getRowId}
-                rowCount={paginationModel.totalRecords}
-              />
-            </Box>
+        {loading ? (
+          <Box display='flex' justifyContent='center' alignItems='center' height='200px'>
+            <CircularProgress />
           </Box>
         ) : (
-          <DataGrid
-            autoHeight
-            rows={articles}
-            columns={articleColumns.filter(column => {
-              // Check if it's mobile view and exclude only the "Select" and "Edit" columns
-              if (isMobileView) {
-                return (
-                  column.field !== 'select' &&
-                  column.field !== 'edit' &&
-                  !(column.field === 'date' && isNarrowMobileView)
-                )
-              }
+          <>
+            {isNotResponsive ? (
+              <Box display='flex'>
+                {isMobileView ? null : (
+                  <Box flex='1' p={2} pr={1}>
+                    <DataGrid
+                      autoHeight
+                      rows={leftArticles}
+                      columns={articleColumns}
+                      pagination={false} // Remove pagination
+                      onRowClick={params => handleRowClick(params)}
+                      getRowId={getRowId}
+                      hideFooter
+                    />
+                  </Box>
+                )}
 
-              return true
-            })}
-            pageSizeOptions={[5, 10, 50]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            onRowClick={params => handleRowClick(params)}
-            getRowId={getRowId}
-            rowCount={paginationModel.totalRecords}
-          />
+                {/* Right Column */}
+                <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
+                  <DataGrid
+                    autoHeight
+                    rows={rightArticles}
+                    columns={articleColumns}
+                    pagination={false} // Remove pagination
+                    onRowClick={params => handleRowClick(params)}
+                    getRowId={getRowId}
+                    hideFooter
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <DataGrid
+                autoHeight
+                rows={articles}
+                columns={articleColumns.filter(column => {
+                  // Check if it's mobile view and exclude only the "Select" and "Edit" columns
+                  if (isMobileView) {
+                    return (
+                      column.field !== 'select' &&
+                      column.field !== 'edit' &&
+                      !(column.field === 'date' && isNarrowMobileView)
+                    )
+                  }
+
+                  return true
+                })}
+                pagination={false} // Remove pagination
+                onRowClick={params => handleRowClick(params)}
+                getRowId={getRowId}
+                hideFooter
+              />
+            )}
+
+            {articles.length > 0 && ( // Only render pagination if there are articles
+              <Pagination
+                paginationModel={paginationModel}
+                currentPage={currentPage}
+                recordsPerPage={recordsPerPage}
+                handleLeftPagination={handleLeftPagination}
+                handleRightPagination={handleRightPagination}
+                handleRecordsPerPageChange={handleRecordsPerPageChange}
+              />
+            )}
+          </>
         )}
       </Box>
       {/* Popup Window */}

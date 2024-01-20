@@ -13,13 +13,15 @@ mock.onPost('/jwt/login').reply(async request => {
       password
     })
 
-    const { accessToken, email, fullName, clientId, clientName } = response.data
+    const { accessToken, email, fullName, clientId, clientName, priorityCompanyId, priorityCompanyName } = response.data
 
     const user = {
       email,
       fullName,
       clientId,
       clientName,
+      priorityCompanyId,
+      priorityCompanyName,
       role: 'admin'
     }
 

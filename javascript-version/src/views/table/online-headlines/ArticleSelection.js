@@ -25,6 +25,10 @@ import { articles } from './Db-Articles'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import dayjs from 'dayjs'
 
+import Pagination from './OnlineHeadlinePagination'
+
+import CircularProgress from '@mui/material/CircularProgress'
+
 // ** Renders social feed column
 const renderSocialFeed = params => {
   const { row } = params
@@ -97,7 +101,7 @@ const TableSelection = () => {
 
   const [paginationModel, setPaginationModel] = useState({
     page: 0,
-    pageSize: 10, // Default pageSize
+    pageSize: 0, // Default pageSize
     totalRecords: 0 // New state for totalRecords
   })
   const [selectedStartDate, setSelectedStartDate] = useState(null)
@@ -109,6 +113,9 @@ const TableSelection = () => {
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const getRowId = row => row.socialFeedId
   const [selectedCompanyId, setSelectedCompanyId] = useState(null)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [recordsPerPage, setRecordsPerPage] = useState(10)
+  const [loading, setLoading] = useState(true)
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -123,6 +130,7 @@ const TableSelection = () => {
   // Fetch social feeds based on the provided API
   const fetchSocialFeeds = async () => {
     try {
+      setLoading(true)
       const storedToken = localStorage.getItem('accessToken')
       const userData = JSON.parse(localStorage.getItem('userData')) // Parse JSON string to object
       const storedClientId = userData?.clientId // Access clientId from userData
@@ -134,8 +142,8 @@ const TableSelection = () => {
           companyIds: selectedCompanyId,
           fromDate: selectedStartDate?.toISOString(),
           toDate: selectedEndDate?.toISOString(),
-          page: 1,
-          recordsPerPage: 100
+          page: currentPage,
+          recordsPerPage: recordsPerPage
         }
 
         console.log(selectedEndDate?.toISOString())
@@ -161,12 +169,14 @@ const TableSelection = () => {
       }
     } catch (error) {
       console.error('Error fetching social feeds:', error)
+    } finally {
+      setLoading(false) // Set loading to false after API call is complete
     }
   }
 
   useEffect(() => {
     fetchSocialFeeds()
-  }, [selectedCompanyId, selectedEndDate, selectedStartDate, paginationModel.page, paginationModel.pageSize])
+  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -243,6 +253,25 @@ const TableSelection = () => {
     setPopupOpen(true)
   }
 
+  const handleLeftPagination = () => {
+    if (currentPage > 1) {
+      setCurrentPage(prevPage => prevPage - 1)
+    }
+  }
+
+  // Function to handle right pagination
+  const handleRightPagination = () => {
+    if (currentPage < Math.ceil(paginationModel.totalRecords / paginationModel.pageSize)) {
+      setCurrentPage(prevPage => prevPage + 1)
+    }
+  }
+
+  const handleRecordsPerPageChange = event => {
+    const newRecordsPerPage = parseInt(event.target.value, 10)
+    setRecordsPerPage(newRecordsPerPage)
+    setCurrentPage(1) // Reset current page when changing records per page
+  }
+
   return (
     <Card>
       <CardHeader title='Social Feed' />
@@ -268,59 +297,70 @@ const TableSelection = () => {
       />
       {/* DataGrid */}
       <Box p={2}>
-        {isNotResponsive ? (
-          <Box display='flex'>
-            {isMobileView ? null : (
-              <Box flex='1' p={2} pr={1}>
-                <DataGrid
-                  autoHeight
-                  rows={leftSocialFeeds}
-                  columns={socialFeedColumns}
-                  pageSizeOptions={[5, 10, 50]}
-                  paginationModel={paginationModel}
-                  onPaginationModelChange={setPaginationModel}
-                  onRowClick={params => handleRowClick(params)}
-                  hideFooterPagination
-                  getRowId={getRowId}
-                  rowCount={paginationModel.totalRecords}
-                />
-              </Box>
-            )}
-
-            {/* Right Column */}
-            <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
-              <DataGrid
-                autoHeight
-                rows={rightSocialFeeds}
-                columns={socialFeedColumns}
-                pageSizeOptions={[5, 10, 50]}
-                paginationModel={paginationModel}
-                onPaginationModelChange={setPaginationModel}
-                onRowClick={params => handleRowClick(params)}
-                getRowId={getRowId}
-                rowCount={paginationModel.totalRecords}
-              />
-            </Box>
+        {loading ? (
+          <Box display='flex' justifyContent='center' alignItems='center' height='200px'>
+            <CircularProgress />
           </Box>
         ) : (
-          <DataGrid
-            autoHeight
-            rows={socialFeeds}
-            columns={socialFeedColumns.filter(column => {
-              // Check if it's mobile view and exclude only the "Select" and "Edit" columns
-              if (isMobileView) {
-                return column.field !== 'select' && column.field !== 'edit' && !isNarrowMobileView
-              }
+          <>
+            {isNotResponsive ? (
+              <Box display='flex'>
+                {isMobileView ? null : (
+                  <Box flex='1' p={2} pr={1}>
+                    <DataGrid
+                      autoHeight
+                      rows={leftSocialFeeds}
+                      columns={socialFeedColumns}
+                      pagination={false} // Remove pagination
+                      onRowClick={params => handleRowClick(params)}
+                      getRowId={getRowId}
+                      hideFooter
+                    />
+                  </Box>
+                )}
 
-              return true
-            })}
-            pageSizeOptions={[5, 10, 50]}
-            paginationModel={paginationModel}
-            onPaginationModelChange={setPaginationModel}
-            onRowClick={params => handleRowClick(params)}
-            getRowId={getRowId}
-            rowCount={paginationModel.totalRecords}
-          />
+                {/* Right Column */}
+                <Box flex='1' p={2} pl={isMobileView ? 0 : 1}>
+                  <DataGrid
+                    autoHeight
+                    rows={rightSocialFeeds}
+                    columns={socialFeedColumns}
+                    pagination={false} // Remove pagination
+                    onRowClick={params => handleRowClick(params)}
+                    getRowId={getRowId}
+                    hideFooter
+                  />
+                </Box>
+              </Box>
+            ) : (
+              <DataGrid
+                autoHeight
+                rows={socialFeeds}
+                columns={socialFeedColumns.filter(column => {
+                  // Check if it's mobile view and exclude only the "Select" and "Edit" columns
+                  if (isMobileView) {
+                    return column.field !== 'select' && column.field !== 'edit' && !isNarrowMobileView
+                  }
+
+                  return true
+                })}
+                pagination={false} // Remove pagination
+                onRowClick={params => handleRowClick(params)}
+                getRowId={getRowId}
+                hideFooter
+              />
+            )}
+            {socialFeeds.length > 0 && ( // Only render pagination if there are articles
+              <Pagination
+                paginationModel={paginationModel}
+                currentPage={currentPage}
+                recordsPerPage={recordsPerPage}
+                handleLeftPagination={handleLeftPagination}
+                handleRightPagination={handleRightPagination}
+                handleRecordsPerPageChange={handleRecordsPerPageChange}
+              />
+            )}
+          </>
         )}
       </Box>
       {/* Popup Window */}

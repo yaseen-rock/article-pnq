@@ -7,10 +7,15 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import axios from 'axios'
 import JSZip from 'jszip'
+import * as XLSX from 'xlsx'
+import CircularProgress from '@mui/material/CircularProgress'
 
 const ImageDialog = ({ open, handleClose, selectedArticles }) => {
   const [imageSrc, setImageSrc] = useState('')
   const [pdfSrc, setPdfSrc] = useState('')
+  const [loadingExcel, setLoadingExcel] = useState(false)
+  const [loadingJPG, setLoadingJPG] = useState(false)
+  const [loadingPDF, setLoadingPDF] = useState(false)
 
   const fetchReadArticleFile = async (articleId, fileType) => {
     try {
@@ -45,7 +50,8 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
     }
   }
 
-  const handleDownload = async fileType => {
+  const handleDownload = async (fileType, setLoading) => {
+    setLoading(true)
     try {
       const zip = new JSZip()
 
@@ -74,11 +80,45 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
+        setLoading(false)
       })
     } catch (error) {
       console.error('Error creating zip file:', error)
+      setLoading(false)
     }
   }
+
+  const handleDownloadExcel = () => {
+    // Extract only the desired fields from each article
+    const dataToExport = selectedArticles.map(article => ({
+      ArticleId: article.articleId,
+      Publication: article.publication,
+      ArticleDate: new Date(article.articleDate).toLocaleDateString('en-GB'),
+      Companies: article.companies.map(company => company.name).join(', '), // Concatenate company names
+      PageNumber: article.pageNumber,
+      Language: article.language
+    }))
+
+    // Create a new workbook
+    const wb = XLSX.utils.book_new()
+    const ws = XLSX.utils.json_to_sheet(dataToExport)
+
+    // Add the worksheet to the workbook
+    XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+
+    // Save the workbook as an Excel file
+    XLSX.writeFile(wb, 'articles.xlsx')
+  }
+
+  const handleDownloadJPG = () => {
+    handleDownload('jpg', setLoadingJPG)
+  }
+
+  const handleDownloadPDF = () => {
+    handleDownload('pdf', setLoadingPDF)
+  }
+
+  const isDownloadDisabled = selectedArticles.length === 0
 
   return (
     <Dialog open={open} onClose={handleClose}>
@@ -90,12 +130,14 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
       </DialogTitle>
 
       <DialogActions>
-        <Button color='primary'>Download Excel</Button>
-        <Button color='primary' onClick={() => handleDownload('jpg')}>
-          Download JPG
+        <Button color='primary' onClick={handleDownloadExcel} disabled={isDownloadDisabled}>
+          Download Excel
         </Button>
-        <Button color='primary' onClick={() => handleDownload('pdf')}>
-          Download PDF
+        <Button color='primary' onClick={handleDownloadJPG} disabled={isDownloadDisabled || loadingJPG}>
+          {loadingJPG ? <CircularProgress size={24} color='primary' /> : 'Download JPG'}
+        </Button>
+        <Button color='primary' onClick={handleDownloadPDF} disabled={isDownloadDisabled || loadingJPG}>
+          {loadingPDF ? <CircularProgress size={24} color='primary' /> : 'Download PDF'}
         </Button>
       </DialogActions>
     </Dialog>
