@@ -15,15 +15,25 @@ export const fetchArticles = async ({ clientIds, companyIds, fromDate, toDate, p
       page,
       recordsPerPage
     }
-    console.log(fromDate?.toISOString())
-    console.log(toDate?.toISOString())
-    console.log(page)
 
     const response = await axios.get(`${base_url}/clientWisePrintArticles/`, {
       headers: {
         Authorization: `Bearer ${storedToken}`
       },
-      params: request_params
+      params: request_params,
+      paramsSerializer: params => {
+        // Custom serializer to handle duplicate parameter names
+        return Object.entries(params)
+          .map(([key, value]) => {
+            if (Array.isArray(value)) {
+              // If the value is an array, create multiple parameters with the same name
+              return value.map(v => `${key}=${encodeURIComponent(v)}`).join('&')
+            } else {
+              return `${key}=${encodeURIComponent(value)}`
+            }
+          })
+          .join('&')
+      }
     })
 
     return response.data
@@ -32,5 +42,3 @@ export const fetchArticles = async ({ clientIds, companyIds, fromDate, toDate, p
     throw error // Re-throw the error for the caller to handle if needed
   }
 }
-
-// Add more API functions as needed

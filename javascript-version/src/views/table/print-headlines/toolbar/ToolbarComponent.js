@@ -8,8 +8,9 @@ import AppBar from '@mui/material/AppBar'
 import Grid from '@mui/material/Grid'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import axios from 'axios'
+import Checkbox from '@mui/material/Checkbox'
 
-const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
+const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
   const [geographyAnchor, setGeographyAnchor] = useState(null)
   const [languageAnchor, setLanguageAnchor] = useState(null)
@@ -18,6 +19,20 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
   const [companies, setCompanies] = useState([])
   const [languages, setLanguages] = useState({})
   const [cities, setCities] = useState([])
+
+  const [selectAllCompetitions, setSelectAllCompetitions] = useState(false)
+
+  const handleSelectAllCompetitions = () => {
+    setSelectAllCompetitions(!selectAllCompetitions)
+    setSelectedCompanyIds(selectAllCompetitions ? [] : companies.map(company => company.companyId))
+  }
+
+  const handleCheckboxChange = companyId => {
+    const selectedIds = selectedCompanyIds.includes(companyId)
+      ? selectedCompanyIds.filter(id => id !== companyId)
+      : [...selectedCompanyIds, companyId]
+    setSelectedCompanyIds(selectedIds)
+  }
 
   const [userData, setUserData] = useState({
     email: '',
@@ -35,12 +50,7 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
     anchorSetter(null)
   }
 
-  const handleDropdownItemClick = companyId => {
-    console.log('Selected Company ID:', companyId)
-    setSelectedCompanyId(companyId)
-    console.log('Updated Selected Company ID:', selectedCompanyId) // Add this line
-    closeDropdown(setCompetitionAnchor)
-  }
+  const handleDropdownItemClick = () => {}
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
@@ -177,8 +187,20 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
           anchorEl={competitionAnchor}
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
+          <MenuItem>
+            <Checkbox
+              checked={selectAllCompetitions}
+              onChange={handleSelectAllCompetitions}
+              indeterminate={selectedCompanyIds.length > 0 && selectedCompanyIds.length < companies.length}
+            />
+            Select All
+          </MenuItem>
           {companies.map(company => (
-            <MenuItem key={company.companyId} onClick={() => handleDropdownItemClick(company.companyId)}>
+            <MenuItem key={company.companyId}>
+              <Checkbox
+                checked={selectedCompanyIds.includes(company.companyId)}
+                onChange={() => handleCheckboxChange(company.companyId)}
+              />
               {company.companyName}
             </MenuItem>
           ))}

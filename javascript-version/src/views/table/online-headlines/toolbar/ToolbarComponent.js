@@ -19,6 +19,8 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
   const [languages, setLanguages] = useState({})
   const [cities, setCities] = useState([])
 
+  const [selectedCompetitions, setSelectedCompetitions] = useState([])
+
   const [userData, setUserData] = useState({
     email: '',
     fullName: '',
@@ -36,10 +38,22 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
   }
 
   const handleDropdownItemClick = companyId => {
-    console.log('Selected Company ID:', companyId)
-    setSelectedCompanyId(companyId)
-    console.log('Updated Selected Company ID:', selectedCompanyId) // Add this line
-    closeDropdown(setCompetitionAnchor)
+    setSelectedCompetitions(prevSelected => {
+      const isAlreadySelected = prevSelected.includes(companyId)
+
+      if (isAlreadySelected) {
+        // If already selected, remove from the list
+        return prevSelected.filter(id => id !== companyId)
+      } else {
+        // If not selected, add to the list
+        return [...prevSelected, companyId]
+      }
+    })
+  }
+
+  const handleSelectAllCompetitions = () => {
+    const allCompanyIds = companies.map(company => company.companyId)
+    setSelectedCompetitions(allCompanyIds)
   }
 
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
@@ -177,8 +191,13 @@ const ToolbarComponent = ({ selectedCompanyId, setSelectedCompanyId }) => {
           anchorEl={competitionAnchor}
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
+          <MenuItem onClick={handleSelectAllCompetitions}>Select All</MenuItem>
           {companies.map(company => (
-            <MenuItem key={company.companyId} onClick={() => handleDropdownItemClick(company.companyId)}>
+            <MenuItem
+              key={company.companyId}
+              onClick={() => handleDropdownItemClick(company.companyId)}
+              selected={selectedCompetitions.includes(company.companyId)}
+            >
               {company.companyName}
             </MenuItem>
           ))}

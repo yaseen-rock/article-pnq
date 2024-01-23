@@ -112,9 +112,11 @@ const TableSelection = () => {
   const [selectedDuration, setSelectedDuration] = useState(null)
   const [isEditDialogOpen, setEditDialogOpen] = useState(false)
   const getRowId = row => row.articleId
-  const [selectedCompanyId, setSelectedCompanyId] = useState(null)
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage, setRecordsPerPage] = useState(10)
+  const [selectedCompanyIds, setSelectedCompanyIds] = useState([])
+
+  console.log(selectedCompanyIds)
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -139,7 +141,7 @@ const TableSelection = () => {
       if (storedToken) {
         const response = await fetchArticles({
           clientIds: storedClientId,
-          companyIds: selectedCompanyId,
+          companyIds: selectedCompanyIds,
           fromDate: selectedStartDate,
           toDate: selectedEndDate,
           page: currentPage,
@@ -163,7 +165,7 @@ const TableSelection = () => {
 
   useEffect(() => {
     fetchArticlesApi()
-  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage])
+  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage, selectedCompanyIds])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -288,11 +290,15 @@ const TableSelection = () => {
     setCurrentPage(1) // Reset current page when changing records per page
   }
 
+  const userData = JSON.parse(localStorage.getItem('userData'))
+  const priorityCompanyName = userData?.priorityCompanyName || 'Default Company' // Provide a default value if priorityCompanyName is not present
+
   return (
     <Card>
-      <CardHeader title='Article Selection' />
+      <CardHeader title={<Typography variant='title-lg'>{priorityCompanyName}</Typography>} />{' '}
+      {/* Use priorityCompanyName in the title */}
       {/* Top Toolbar */}
-      <ToolbarComponent selectedCompanyId={selectedCompanyId} setSelectedCompanyId={setSelectedCompanyId} />
+      <ToolbarComponent selectedCompanyIds={selectedCompanyIds} setSelectedCompanyIds={setSelectedCompanyIds} />{' '}
       {/* Toolbar with Date Filter */}
       <ArticleListToolbar
         setSearchQuery={setSearchQuery}
