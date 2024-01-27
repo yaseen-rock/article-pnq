@@ -9,6 +9,7 @@ import Grid from '@mui/material/Grid'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import axios from 'axios'
 import Checkbox from '@mui/material/Checkbox'
+import ListItem from '@mui/material/ListItem'
 
 const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
@@ -23,15 +24,26 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [selectAllCompetitions, setSelectAllCompetitions] = useState(false)
 
   const handleSelectAllCompetitions = () => {
-    setSelectAllCompetitions(!selectAllCompetitions)
-    setSelectedCompanyIds(selectAllCompetitions ? [] : companies.map(company => company.companyId))
+    const allCompanyIds = companies.map(company => company.companyId)
+    setSelectedCompanyIds(allCompanyIds)
+  }
+
+  const handleDeselectAllCompetitions = () => {
+    setSelectedCompanyIds([])
   }
 
   const handleCheckboxChange = companyId => {
-    const selectedIds = selectedCompanyIds.includes(companyId)
-      ? selectedCompanyIds.filter(id => id !== companyId)
-      : [...selectedCompanyIds, companyId]
-    setSelectedCompanyIds(selectedIds)
+    setSelectedCompanyIds(prevSelected => {
+      const isAlreadySelected = prevSelected.includes(companyId)
+
+      if (isAlreadySelected) {
+        // If already selected, remove from the list
+        return prevSelected.filter(id => id !== companyId)
+      } else {
+        // If not selected, add to the list
+        return [...prevSelected, companyId]
+      }
+    })
   }
 
   const [userData, setUserData] = useState({
@@ -182,25 +194,22 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
           </>
         )}
 
+        {/* Competition Dropdown Menu */}
         <Menu
           open={Boolean(competitionAnchor)}
           anchorEl={competitionAnchor}
           onClose={() => closeDropdown(setCompetitionAnchor)}
         >
-          <MenuItem>
-            <Checkbox
-              checked={selectAllCompetitions}
-              onChange={handleSelectAllCompetitions}
-              indeterminate={selectedCompanyIds.length > 0 && selectedCompanyIds.length < companies.length}
-            />
-            Select All
-          </MenuItem>
+          <ListItem sx={{ justifyContent: 'space-between' }}>
+            <Button onClick={handleSelectAllCompetitions}>Select All</Button>
+            <Button onClick={handleDeselectAllCompetitions}>Deselect All</Button>
+          </ListItem>
           {companies.map(company => (
-            <MenuItem key={company.companyId}>
-              <Checkbox
-                checked={selectedCompanyIds.includes(company.companyId)}
-                onChange={() => handleCheckboxChange(company.companyId)}
-              />
+            <MenuItem
+              key={company.companyId}
+              onClick={() => handleCheckboxChange(company.companyId)}
+              selected={selectedCompanyIds.includes(company.companyId)}
+            >
               {company.companyName}
             </MenuItem>
           ))}

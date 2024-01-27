@@ -1,11 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import Box from '@mui/material/Box'
 import Typography from '@mui/material/Typography'
-import Select from '@mui/material/Select'
-import MenuItem from '@mui/material/MenuItem'
 import Button from '@mui/material/Button'
 import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore'
 import NavigateNextIcon from '@mui/icons-material/NavigateNext'
+import RecordsPerPageSelector from './RecordsPerPageSelector'
 
 const Pagination = ({
   paginationModel,
@@ -13,8 +12,16 @@ const Pagination = ({
   recordsPerPage,
   handleLeftPagination,
   handleRightPagination,
-  handleRecordsPerPageChange
+  handleRecordsPerPageUpdate
 }) => {
+  // Calculate the range of records currently displayed
+  const startRecord = (currentPage - 1) * recordsPerPage + 1
+
+  const endRecord =
+    currentPage * recordsPerPage > paginationModel.totalRecords
+      ? paginationModel.totalRecords
+      : currentPage * recordsPerPage
+
   return (
     <Box
       display='flex'
@@ -29,9 +36,9 @@ const Pagination = ({
         mb={{ xs: 2, md: 0 }} // Add margin-bottom for small screens
       >
         {/* Empty box to push content to the right side */}
-        <Typography variant='body2' sx={{ marginLeft: { xs: 0, md: 7 } }}>
-          Total Records: {paginationModel.totalRecords}
-        </Typography>
+        {/* <Typography variant='body2' sx={{ marginLeft: { xs: 0, md: 7 } }}>
+          Total Records:  {startRecord}-{endRecord} of {paginationModel.totalRecords}
+        </Typography> */}
       </Box>
       <Box sx={{ flexGrow: 1 }} />
       <Box
@@ -40,22 +47,19 @@ const Pagination = ({
         alignItems='center'
         mb={{ xs: 2, md: 0 }} // Add margin-bottom for small screens
       >
-        <Typography variant='body2' sx={{ marginRight: { xs: 0, md: 2 } }}>
-          Records per Page:
-        </Typography>
-        <Select value={recordsPerPage} onChange={handleRecordsPerPageChange} sx={{ width: { xs: '100%', md: 'auto' } }}>
-          <MenuItem value={5}>5</MenuItem>
-          <MenuItem value={10}>10</MenuItem>
-          <MenuItem value={20}>20</MenuItem>
-          <MenuItem value={50}>50</MenuItem>
-          {/* Add more options as needed */}
-        </Select>
+        <RecordsPerPageSelector
+          recordsPerPage={recordsPerPage}
+          handleRecordsPerPageUpdate={handleRecordsPerPageUpdate}
+        />
       </Box>
       <Box
         display='flex'
         flexDirection={{ xs: 'column', md: 'row' }} // Adjust the layout based on screen size
         alignItems='center'
       >
+        <Typography variant='body2' sx={{ marginLeft: { xs: 0, md: 7 } }}>
+          {startRecord}-{endRecord} of {paginationModel.totalRecords}
+        </Typography>
         <Button
           startIcon={<NavigateBeforeIcon />}
           onClick={handleLeftPagination}

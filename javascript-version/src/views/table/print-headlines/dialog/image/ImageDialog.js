@@ -130,9 +130,9 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
       </DialogTitle>
 
       <DialogActions>
-        <Button color='primary' onClick={handleDownloadExcel} disabled={isDownloadDisabled}>
+        {/* <Button color='primary' onClick={handleDownloadExcel} disabled={isDownloadDisabled}>
           Download Excel
-        </Button>
+        </Button> */}
         <Button color='primary' onClick={handleDownloadJPG} disabled={isDownloadDisabled || loadingJPG}>
           {loadingJPG ? <CircularProgress size={24} color='primary' /> : 'Download JPG'}
         </Button>
