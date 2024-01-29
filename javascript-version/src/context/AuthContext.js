@@ -10,6 +10,11 @@ import axios from 'axios'
 // ** Config
 import authConfig from 'src/configs/auth'
 
+// ** Redux
+import { useDispatch, useSelector } from 'react-redux'
+import { setUserData, selectUserData } from 'src/store/apps/user/userSlice'
+import { clearUserData } from 'src/store/apps/user/userSlice'
+
 // ** Defaults
 const defaultProvider = {
   user: null,
@@ -22,6 +27,10 @@ const defaultProvider = {
 const AuthContext = createContext(defaultProvider)
 
 const AuthProvider = ({ children }) => {
+  // ** Redux
+  const dispatch = useDispatch()
+  const userData = useSelector(selectUserData)
+
   // ** States
   const [user, setUser] = useState(defaultProvider.user)
   const [loading, setLoading] = useState(defaultProvider.loading)
@@ -41,7 +50,7 @@ const AuthProvider = ({ children }) => {
           })
           .then(async response => {
             setLoading(false)
-            setUser({ ...response.data.userData })
+            dispatch(setUserData(response.data.userData)) // Set user data in Redux
           })
           .catch(() => {
             localStorage.removeItem('userData')
@@ -65,12 +74,16 @@ const AuthProvider = ({ children }) => {
     axios
       .post(authConfig.loginEndpoint, params)
       .then(async response => {
-        params.rememberMe
-          ? window.localStorage.setItem(authConfig.storageTokenKeyName, response.data.accessToken)
-          : null
+        const { accessToken, userData } = response.data
+
+        // Store data in localStorage
+        params.rememberMe ? window.localStorage.setItem(authConfig.storageTokenKeyName, accessToken) : null
+        window.localStorage.setItem('userData', JSON.stringify(userData))
+
+        // Set user data in Redux
+        dispatch(setUserData(userData))
+
         const returnUrl = router.query.returnUrl
-        setUser({ ...response.data.userData })
-        params.rememberMe ? window.localStorage.setItem('userData', JSON.stringify(response.data.userData)) : null
         const redirectURL = returnUrl && returnUrl !== '/' ? returnUrl : '/'
         router.replace(redirectURL)
       })
@@ -80,14 +93,22 @@ const AuthProvider = ({ children }) => {
   }
 
   const handleLogout = () => {
+    // Set local state to null
     setUser(null)
+
+    // Dispatch the action to clear user data in Redux
+    dispatch(clearUserData())
+
+    // Clear data in localStorage
     window.localStorage.removeItem('userData')
     window.localStorage.removeItem(authConfig.storageTokenKeyName)
+
+    // Navigate to the login page
     router.push('/login')
   }
 
   const values = {
-    user,
+    user: userData, // Use data from Redux store,
     loading,
     setUser,
     setLoading,

@@ -13,9 +13,11 @@ import Divider from '@mui/material/Divider'
 import { styled } from '@mui/material/styles'
 import Typography from '@mui/material/Typography'
 import MenuItem from '@mui/material/MenuItem'
+import ClientPopover from './ClientPopover'
 
 // ** Icon Imports
 import Icon from 'src/@core/components/icon'
+import BusinessIcon from '@mui/icons-material/Business'
 
 // ** Context
 import { useAuth } from 'src/hooks/useAuth'
@@ -36,6 +38,18 @@ const MenuItemStyled = styled(MenuItem)(({ theme }) => ({
 }))
 
 const UserDropdown = props => {
+  const [clientAnchorEl, setClientAnchorEl] = useState(null)
+
+  // ... (previous code)
+
+  const handleClientClick = event => {
+    setClientAnchorEl(event.currentTarget)
+  }
+
+  const handleClientClose = () => {
+    setClientAnchorEl(null)
+  }
+
   // ** Props
   const { settings } = props
 
@@ -145,7 +159,7 @@ const UserDropdown = props => {
           </Box>
         </MenuItemStyled>
         <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
-        <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/help-center')}>
+        {/* <MenuItemStyled sx={{ p: 0 }} onClick={() => handleDropdownClose('/pages/help-center')}>
           <Box sx={styles}>
             <Icon icon='tabler:lifebuoy' />
             Help
@@ -162,7 +176,18 @@ const UserDropdown = props => {
             <Icon icon='tabler:currency-dollar' />
             Pricing
           </Box>
+        </MenuItemStyled> */}
+
+        {/* Client option */}
+        <MenuItemStyled sx={{ p: 0 }} onClick={handleClientClick}>
+          <Box sx={styles}>
+            <BusinessIcon />
+            Client
+          </Box>
         </MenuItemStyled>
+        {/* ... (previous code) */}
+        <ClientPopover anchorEl={clientAnchorEl} onClose={handleClientClose} />
+
         <Divider sx={{ my: theme => `${theme.spacing(2)} !important` }} />
         <MenuItemStyled sx={{ p: 0 }} onClick={handleLogout}>
           <Box sx={styles}>

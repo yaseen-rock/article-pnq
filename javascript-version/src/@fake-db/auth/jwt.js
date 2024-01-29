@@ -8,20 +8,17 @@ mock.onPost('/jwt/login').reply(async request => {
   const { loginName, password } = JSON.parse(request.data)
 
   try {
-    const response = await axios.post('http://51.68.220.77:8001/authenticate', {
+    const response = await axios.post('http://51.68.220.77:8001/authenticateUser', {
       loginName,
       password
     })
 
-    const { accessToken, email, fullName, clientId, clientName, priorityCompanyId, priorityCompanyName } = response.data
+    const { accessToken, email, fullName, clientList } = response.data
 
     const user = {
       email,
       fullName,
-      clientId,
-      clientName,
-      priorityCompanyId,
-      priorityCompanyName,
+      clientList,
       role: 'admin'
     }
 

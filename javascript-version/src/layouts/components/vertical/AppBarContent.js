@@ -12,6 +12,7 @@ import UserDropdown from 'src/@core/layouts/components/shared-components/UserDro
 import LanguageDropdown from 'src/@core/layouts/components/shared-components/LanguageDropdown'
 import NotificationDropdown from 'src/@core/layouts/components/shared-components/NotificationDropdown'
 import ShortcutsDropdown from 'src/@core/layouts/components/shared-components/ShortcutsDropdown'
+import ClientDropdown from 'src/@core/layouts/components/shared-components/ClientDropdown'
 
 // ** Hook Import
 import { useAuth } from 'src/hooks/useAuth'
@@ -131,11 +132,13 @@ const AppBarContent = props => {
       </Box>
       <Box className='actions-right' sx={{ display: 'flex', alignItems: 'center' }}>
         <LanguageDropdown settings={settings} saveSettings={saveSettings} />
+
         <ModeToggler settings={settings} saveSettings={saveSettings} />
         {auth.user && (
           <>
             <ShortcutsDropdown settings={settings} shortcuts={shortcuts} />
             <NotificationDropdown settings={settings} notifications={notifications} />
+            <ClientDropdown />
             <UserDropdown settings={settings} />
           </>
         )}

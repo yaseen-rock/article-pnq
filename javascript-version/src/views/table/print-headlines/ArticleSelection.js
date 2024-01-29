@@ -27,6 +27,9 @@ import Pagination from './Pagination'
 
 import CircularProgress from '@mui/material/CircularProgress'
 
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
+import { selectSelectedClient } from 'src/store/apps/user/userSlice'
+
 // ** Renders social feed column
 const renderArticle = params => {
   const { row } = params
@@ -115,6 +118,8 @@ const TableSelection = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage, setRecordsPerPage] = useState(10)
   const [selectedCompanyIds, setSelectedCompanyIds] = useState([])
+  const selectedClient = useSelector(selectSelectedClient)
+  const clientId = selectedClient ? selectedClient.clientId : null
 
   console.log(selectedCompanyIds)
 
@@ -135,12 +140,10 @@ const TableSelection = () => {
     try {
       setLoading(true)
       const storedToken = localStorage.getItem('accessToken')
-      const userData = JSON.parse(localStorage.getItem('userData'))
-      const storedClientId = userData?.clientId
 
       if (storedToken) {
         const response = await fetchArticles({
-          clientIds: storedClientId,
+          clientIds: clientId,
           companyIds: selectedCompanyIds,
           fromDate: selectedStartDate,
           toDate: selectedEndDate,
@@ -165,7 +168,7 @@ const TableSelection = () => {
 
   useEffect(() => {
     fetchArticlesApi()
-  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage, selectedCompanyIds])
+  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage, selectedCompanyIds, clientId])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -293,13 +296,9 @@ const TableSelection = () => {
     }
   }
 
-  const userData = JSON.parse(localStorage.getItem('userData'))
-  const priorityCompanyName = userData?.priorityCompanyName || 'Default Company' // Provide a default value if priorityCompanyName is not present
-
   return (
     <Card>
-      <CardHeader title={<Typography variant='title-lg'>{priorityCompanyName}</Typography>} />{' '}
-      {/* Use priorityCompanyName in the title */}
+      <CardHeader title={<Typography variant='title-lg'></Typography>} /> {/* Use priorityCompanyName in the title */}
       {/* Top Toolbar */}
       <ToolbarComponent selectedCompanyIds={selectedCompanyIds} setSelectedCompanyIds={setSelectedCompanyIds} />{' '}
       {/* Toolbar with Date Filter */}
