@@ -551,17 +551,17 @@ const navigation = () => {
     // },
     {
       title: 'Online Headlines',
-      icon: 'tabler:layout-grid',
+      icon: 'fluent-mdl2:news-search',
       path: '/headlines/online'
     },
     {
       title: 'Print Headlines',
-      icon: 'tabler:layout-grid',
+      icon: 'emojione-monotone:newspaper',
       path: '/headlines/print'
     },
     {
       title: 'Print & Online Headlines',
-      icon: 'tabler:layout-grid',
+      icon: 'material-symbols:article-shortcut-outline-rounded',
       path: '/headlines/print-online'
     },
     {

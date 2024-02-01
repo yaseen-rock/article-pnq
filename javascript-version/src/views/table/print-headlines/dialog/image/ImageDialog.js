@@ -50,10 +50,32 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
     }
   }
 
+  // ... (previous code)
+
   const handleDownload = async (fileType, setLoading) => {
     setLoading(true)
     try {
       const zip = new JSZip()
+
+      // Add Excel file to zip only if fileType is 'jpg' or 'pdf'
+      if (fileType === 'jpg' || fileType === 'pdf') {
+        const dataToExport = selectedArticles.map(article => ({
+          ArticleId: article.articleId,
+          Publication: article.publication,
+          ArticleDate: new Date(article.articleDate).toLocaleDateString('en-GB'),
+          Companies: article.companies.map(company => company.name).join(', '), // Concatenate company names
+          PageNumber: article.pageNumber,
+          Language: article.language
+        }))
+
+        const wb = XLSX.utils.book_new()
+        const ws = XLSX.utils.json_to_sheet(dataToExport)
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet1')
+
+        // Convert Excel blob to binary
+        const excelData = XLSX.write(wb, { bookType: 'xlsx', bookSST: false, type: 'binary' })
+        zip.file('articles.xlsx', excelData, { binary: true })
+      }
 
       for (const article of selectedArticles) {
         try {
@@ -87,6 +109,8 @@ const ImageDialog = ({ open, handleClose, selectedArticles }) => {
       setLoading(false)
     }
   }
+
+  // ... (rest of the code remains unchanged)
 
   const handleDownloadExcel = () => {
     // Extract only the desired fields from each article

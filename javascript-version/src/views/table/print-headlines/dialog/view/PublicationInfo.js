@@ -5,6 +5,7 @@ import Typography from '@mui/material/Typography'
 import Grid from '@mui/material/Grid'
 import Paper from '@mui/material/Paper'
 import Divider from '@mui/material/Divider'
+import Card from '@mui/material/Card'
 
 const PublicationInfo = ({ articles }) => {
   // Dummy data for illustration
@@ -26,7 +27,7 @@ const PublicationInfo = ({ articles }) => {
   })
 
   return (
-    <>
+    <Card sx={{ padding: '7px' }}>
       <Paper elevation={0} sx={{ flexGrow: 1, textAlign: 'left', padding: '7px' }}>
         <Grid container justifyContent='space-between' alignItems='center'>
           {/* Left side heading */}
@@ -44,7 +45,7 @@ const PublicationInfo = ({ articles }) => {
         </Grid>
       </Paper>
       {/* <Divider sx={{ marginBottom: 2 }} /> */}
-      <Grid container spacing={2}>
+      <Grid container spacing={2} sx={{ paddingLeft: 2, paddingRight: 2 }}>
         {/* Grid for Header Information */}
         <Grid item xs={12} sm={6} md={3}>
           <Typography variant='body2' color='primary' style={{ display: 'inline' }}>
@@ -112,8 +113,7 @@ const PublicationInfo = ({ articles }) => {
           </Typography>
         </Grid>
       </Grid>
-      <Divider sx={{ marginTop: 2 }} />
-    </>
+    </Card>
   )
 }
 

@@ -11,6 +11,7 @@ import TableCell from '@mui/material/TableCell'
 import TableContainer from '@mui/material/TableContainer'
 import TableRow from '@mui/material/TableRow'
 import { updateClientTagsToCompany } from '../../../../../api/print-headlines/dialog/view/articleTagEditApi'
+import Card from '@mui/material/Card'
 
 const ArticleTagEdit = ({ articles, handleClose, token }) => {
   const [tags, setTags] = useState(articles.tags || [])
@@ -49,38 +50,40 @@ const ArticleTagEdit = ({ articles, handleClose, token }) => {
   }
 
   return (
-    <TableContainer component={Paper}>
-      <Typography variant='h6' align='center' sx={{ marginTop: 3 }}>
-        Article Tag Edit
-      </Typography>
-      <Table>
-        <TableBody>
-          {articles.companies.map((company, companyIndex) => (
-            <TableRow key={company.id}>
-              <TableCell>{company.name}</TableCell>
-              {[1, 2, 3, 4, 5].map(tagIndex => (
-                <TableCell key={tagIndex}>
-                  <TextField
-                    size='small'
-                    label={`Tag ${tagIndex}`}
-                    value={(tags[companyIndex] && tags[companyIndex][`tag${tagIndex}`]) || ''}
-                    onChange={e => handleAddTag(companyIndex, tagIndex - 1, e.target.value)}
-                  />
-                </TableCell>
-              ))}
-            </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-      <Grid container justifyContent='flex-end' sx={{ marginTop: 2 }}>
-        <Button color='primary' onClick={handleSaveDetails}>
-          Save
-        </Button>
-        <Button color='primary' onClick={handleClose} sx={{ marginLeft: 2 }}>
-          Cancel
-        </Button>
-      </Grid>
-    </TableContainer>
+    <Card>
+      <TableContainer component={Paper}>
+        <Typography variant='h6' align='center' sx={{ marginTop: 3 }}>
+          Article Tag Edit
+        </Typography>
+        <Table>
+          <TableBody>
+            {articles.companies.map((company, companyIndex) => (
+              <TableRow key={company.id}>
+                <TableCell>{company.name}</TableCell>
+                {[1, 2, 3, 4, 5].map(tagIndex => (
+                  <TableCell key={tagIndex}>
+                    <TextField
+                      size='small'
+                      label={`Tag ${tagIndex}`}
+                      value={(tags[companyIndex] && tags[companyIndex][`tag${tagIndex}`]) || ''}
+                      onChange={e => handleAddTag(companyIndex, tagIndex - 1, e.target.value)}
+                    />
+                  </TableCell>
+                ))}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+        <Grid container justifyContent='flex-end' sx={{ marginTop: 2 }}>
+          <Button color='primary' onClick={handleSaveDetails}>
+            Save
+          </Button>
+          <Button color='primary' onClick={handleClose} sx={{ marginLeft: 2 }}>
+            Cancel
+          </Button>
+        </Grid>
+      </TableContainer>
+    </Card>
   )
 }
 

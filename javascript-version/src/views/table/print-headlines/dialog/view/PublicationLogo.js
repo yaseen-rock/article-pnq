@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react'
 import Typography from '@mui/material/Typography'
 import axios from 'axios'
+import Card from '@mui/material/Card'
 
 const PublicationLogo = ({ articles }) => {
   const [logoInfo, setLogoInfo] = useState({
@@ -49,39 +50,41 @@ const PublicationLogo = ({ articles }) => {
   }, [articles])
 
   return (
-    <div style={{ textAlign: 'center', marginBottom: '16px' }}>
-      {/* Logo on the left */}
-      {logoInfo.leftLogo && (
-        <img
-          src={logoInfo.leftLogo}
-          alt='Left Logo'
-          style={{ width: '55px', height: '45px', marginRight: '388px', border: '1px solid #000' }}
-        />
-      )}
+    <Card>
+      <div style={{ textAlign: 'center', marginBottom: '16px' }}>
+        {/* Logo on the left */}
+        {logoInfo.leftLogo && (
+          <img
+            src={logoInfo.leftLogo}
+            alt='Left Logo'
+            style={{ width: '55px', height: '45px', marginRight: '388px', border: '1px solid #000' }}
+          />
+        )}
 
-      {/* Main publication logo in the middle */}
-      {logoInfo.mainLogo && (
-        <img
-          src={logoInfo.mainLogo}
-          alt='Publication Logo'
-          style={{ width: '250px', height: '80px', border: '1px solid #000' }}
-        />
-      )}
+        {/* Main publication logo in the middle */}
+        {logoInfo.mainLogo && (
+          <img
+            src={logoInfo.mainLogo}
+            alt='Publication Logo'
+            style={{ width: '250px', height: '80px', border: '1px solid #000' }}
+          />
+        )}
 
-      {/* Logo on the right */}
-      {logoInfo.rightLogo && (
-        <img
-          src={logoInfo.rightLogo}
-          alt='Right Logo'
-          style={{ width: '55px', height: '45px', marginLeft: '388px', border: '1px solid #000' }}
-        />
-      )}
+        {/* Logo on the right */}
+        {logoInfo.rightLogo && (
+          <img
+            src={logoInfo.rightLogo}
+            alt='Right Logo'
+            style={{ width: '55px', height: '45px', marginLeft: '388px', border: '1px solid #000' }}
+          />
+        )}
 
-      {/* Copyright text */}
-      <Typography variant='body2' color='textSecondary'>
-        {logoInfo.copyrightText}
-      </Typography>
-    </div>
+        {/* Copyright text */}
+        <Typography variant='body2' color='textSecondary'>
+          {logoInfo.copyrightText}
+        </Typography>
+      </div>
+    </Card>
   )
 }
 

@@ -11,6 +11,10 @@ import axios from 'axios'
 import Checkbox from '@mui/material/Checkbox'
 import ListItem from '@mui/material/ListItem'
 
+// ** Redux
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
+import { selectSelectedClient } from 'src/store/apps/user/userSlice'
+
 const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
   const [geographyAnchor, setGeographyAnchor] = useState(null)
@@ -22,6 +26,9 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [cities, setCities] = useState([])
 
   const [selectAllCompetitions, setSelectAllCompetitions] = useState(false)
+
+  const selectedClient = useSelector(selectSelectedClient)
+  const clientId = selectedClient ? selectedClient.clientId : null
 
   const handleSelectAllCompetitions = () => {
     const allCompanyIds = companies.map(company => company.companyId)
@@ -69,19 +76,14 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   useEffect(() => {
     const fetchUserDataAndCompanies = async () => {
       try {
-        const storedUserData = localStorage.getItem('userData')
-        if (storedUserData) {
-          setUserData(JSON.parse(storedUserData))
-        }
-
         const storedToken = localStorage.getItem('accessToken')
-        if (storedToken && userData.clientId) {
+        if (storedToken) {
           const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
             headers: {
               Authorization: `Bearer ${storedToken}`
             },
             params: {
-              clientId: userData.clientId
+              clientId: clientId
             }
           })
           setCompanies(response.data.companies)
@@ -108,7 +110,7 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
     }
 
     fetchUserDataAndCompanies()
-  }, [userData.clientId])
+  }, [clientId])
 
   return (
     <AppBar sx={{ position: 'static' }}>

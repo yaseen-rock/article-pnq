@@ -7,6 +7,7 @@ import Grid from '@mui/material/Grid'
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Divider from '@mui/material/Divider'
+import Card from '@mui/material/Card'
 
 const EditJournalist = ({ articles, onSave, onCancel }) => {
   const [articleData, setArticleData] = useState({
@@ -19,8 +20,7 @@ const EditJournalist = ({ articles, onSave, onCancel }) => {
   }
 
   return (
-    <>
-      <Paper elevation={0} sx={{ flexGrow: 1, textAlign: 'left', padding: '7px' }}></Paper>
+    <Card sx={{ padding: '7px' }}>
       <Typography variant='h6' align='center' sx={{ marginBottom: 2 }}>
         Article Data
       </Typography>
@@ -55,8 +55,7 @@ const EditJournalist = ({ articles, onSave, onCancel }) => {
           Cancel
         </Button>
       </Grid>
-      <Divider sx={{ marginTop: 2 }} />
-    </>
+    </Card>
   )
 }
 

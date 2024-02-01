@@ -12,6 +12,8 @@ import CircularProgress from '@mui/material/CircularProgress'
 import FooterDialog from './FooterDialog'
 import PublicationLogo from './PublicationLogo'
 import ArticleTagEdit from './ArticleTagEdit'
+import Card from '@mui/material/Card'
+import Grid from '@mui/material/Grid'
 
 const FullScreenEditDetailsDialog = ({ open, handleClose, imageSrc, articles }) => {
   const [loading, setLoading] = useState(true)
@@ -29,25 +31,35 @@ const FullScreenEditDetailsDialog = ({ open, handleClose, imageSrc, articles }) 
         <CloseIcon />
       </IconButton>
 
-      <DialogContent>
-        <Box border={1} borderColor='grey.300' borderRadius={4} p={3} mt={2}>
+      <DialogContent container spacing={6}>
+        <Grid container spacing={6}>
           {/* Wrap the components inside the Box */}
-          <PublicationLogo articles={articles} />
-          <PublicationInfo articles={articles} />
-          <EditJournalist articles={articles} />
-          <ArticleTagEdit articles={articles} handleClose={handleClose} />
-        </Box>
+          <Grid item xs={12}>
+            <PublicationLogo articles={articles} />
+          </Grid>
+          <Grid item xs={12}>
+            <PublicationInfo articles={articles} />
+          </Grid>
+          <Grid item xs={12}>
+            <EditJournalist articles={articles} />
+          </Grid>
+          <Grid item xs={12}>
+            <ArticleTagEdit articles={articles} handleClose={handleClose} />
+          </Grid>
 
-        <Box mt={2}>
-          {/* Conditional rendering of loader */}
-          {loading ? (
-            <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-              <CircularProgress />
-            </div>
-          ) : (
-            <img src={imageSrc} alt='JPG Image' style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
-          )}
-        </Box>
+          <Grid item xs={12}>
+            <Card mt={2}>
+              {/* Conditional rendering of loader */}
+              {loading ? (
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
+                  <CircularProgress />
+                </div>
+              ) : (
+                <img src={imageSrc} alt='JPG Image' style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              )}
+            </Card>
+          </Grid>
+        </Grid>
       </DialogContent>
       <FooterDialog />
     </Dialog>

@@ -27,6 +27,7 @@ import Pagination from './Pagination'
 
 import CircularProgress from '@mui/material/CircularProgress'
 
+// ** Redux
 import { useSelector } from 'react-redux' // Import useSelector from react-redux
 import { selectSelectedClient } from 'src/store/apps/user/userSlice'
 
@@ -121,7 +122,8 @@ const TableSelection = () => {
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
 
-  console.log(selectedCompanyIds)
+  // Access priorityCompanyName from selectedClient
+  const priorityCompanyName = selectedClient ? selectedClient.priorityCompanyName : ''
 
   const handleEdit = row => {
     setSelectedArticle(row)
@@ -298,7 +300,8 @@ const TableSelection = () => {
 
   return (
     <Card>
-      <CardHeader title={<Typography variant='title-lg'></Typography>} /> {/* Use priorityCompanyName in the title */}
+      <CardHeader title={<Typography variant='title-lg'>{priorityCompanyName}</Typography>} />{' '}
+      {/* Use priorityCompanyName in the title */}
       {/* Top Toolbar */}
       <ToolbarComponent selectedCompanyIds={selectedCompanyIds} setSelectedCompanyIds={setSelectedCompanyIds} />{' '}
       {/* Toolbar with Date Filter */}
