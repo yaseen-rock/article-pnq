@@ -20,6 +20,10 @@ import Icon from 'src/@core/components/icon'
 // ** Context
 import { useAuth } from 'src/hooks/useAuth'
 
+// ** Redux
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
+import { selectUserData } from 'src/store/apps/user/userSlice'
+
 // ** Styled Components
 const BadgeContentSpan = styled('span')(({ theme }) => ({
   width: 8,
@@ -36,6 +40,9 @@ const MenuItemStyled = styled(MenuItem)(({ theme }) => ({
 }))
 
 const UserDropdown = props => {
+  const UserData = useSelector(selectUserData)
+  const UserName = UserData ? UserData.fullName : null
+
   // ** Props
   const { settings } = props
 
@@ -120,7 +127,7 @@ const UserDropdown = props => {
               <Avatar alt='John Doe' src='/images/avatars/1.png' sx={{ width: '2.5rem', height: '2.5rem' }} />
             </Badge>
             <Box sx={{ display: 'flex', ml: 2.5, alignItems: 'flex-start', flexDirection: 'column' }}>
-              <Typography sx={{ fontWeight: 500 }}>John Doe</Typography>
+              <Typography sx={{ fontWeight: 500 }}>{UserName}</Typography>
               <Typography variant='body2'>Admin</Typography>
             </Box>
           </Box>

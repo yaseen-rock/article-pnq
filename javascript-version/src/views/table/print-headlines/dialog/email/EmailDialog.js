@@ -1,69 +1,114 @@
 import React, { useState } from 'react'
 import Dialog from '@mui/material/Dialog'
 import DialogTitle from '@mui/material/DialogTitle'
-import TextField from '@mui/material/TextField'
-import ToggleButton from '@mui/material/ToggleButton'
-import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
-import Button from '@mui/material/Button'
 import DialogActions from '@mui/material/DialogActions'
+import Button from '@mui/material/Button'
+import Checkbox from '@mui/material/Checkbox'
+import FormControlLabel from '@mui/material/FormControlLabel'
+import Radio from '@mui/material/Radio'
+import RadioGroup from '@mui/material/RadioGroup'
+import FormGroup from '@mui/material/FormGroup'
+import FormControl from '@mui/material/FormControl'
+import Select from '@mui/material/Select'
+import MenuItem from '@mui/material/MenuItem'
 
 const EmailDialog = ({ open, onClose }) => {
-  const [to, setTo] = useState('')
-  const [cc, setCc] = useState('')
-  const [bcc, setBcc] = useState('')
-  const [selectedOption, setSelectedOption] = useState('to') // 'to', 'cc', or 'bcc'
+  const [emailType, setEmailType] = useState({})
+  const [selectAll, setSelectAll] = useState(false)
+  const [selectedEmails, setSelectedEmails] = useState([])
 
-  const handleSend = () => {
-    // Implement your send email logic here
-    // You can use the values of 'to', 'cc', 'bcc', and 'selectedOption' for further processing
-    console.log('Sending email:', { to, cc, bcc, selectedOption })
+  const dummyEmails = [
+    'dummy1@example.com',
+    'dummy2@example.com',
+    'dummy3@example.com',
+    'dummy4@example.com',
+    'dummy5@example.com'
+  ]
 
-    // Close the dialog after sending email
+  const handleEmailTypeChange = (event, email) => {
+    setEmailType({
+      ...emailType,
+      [email]: event.target.value
+    })
+  }
+
+  const handleCheckboxChange = email => {
+    if (selectedEmails.includes(email)) {
+      setSelectedEmails(selectedEmails.filter(selected => selected !== email))
+    } else {
+      setSelectedEmails([...selectedEmails, email])
+    }
+  }
+
+  const handleSelectAllChange = () => {
+    setSelectAll(!selectAll)
+    setSelectedEmails(selectAll ? [] : dummyEmails)
+  }
+
+  const handleSendEmail = () => {
+    console.log('Email Types:', emailType)
+    console.log('Selected Emails:', selectedEmails)
     onClose()
   }
 
-  const handleCancel = () => {
-    // Close the dialog without sending email
-    onClose()
+  const handleAllDropdownChange = value => {
+    if (value === 'all') {
+      setSelectedEmails([...dummyEmails])
+    } else if (value === 'none') {
+      setSelectedEmails([])
+    }
   }
 
   return (
     <Dialog open={open} onClose={onClose}>
       <DialogTitle>Send Email</DialogTitle>
-      <form>
-        <ToggleButtonGroup
-          value={selectedOption}
-          exclusive
-          onChange={(event, newOption) => setSelectedOption(newOption)}
-          aria-label='Email Options'
-        >
-          <ToggleButton value='to' aria-label='To'>
-            To
-          </ToggleButton>
-          <ToggleButton value='cc' aria-label='Cc'>
-            Cc
-          </ToggleButton>
-          <ToggleButton value='bcc' aria-label='Bcc'>
-            Bcc
-          </ToggleButton>
-        </ToggleButtonGroup>
-        <TextField
-          label={selectedOption === 'to' ? 'To' : selectedOption === 'cc' ? 'Cc' : 'Bcc'}
-          fullWidth
-          margin='normal'
-          value={selectedOption === 'to' ? to : selectedOption === 'cc' ? cc : bcc}
-          onChange={e => {
-            if (selectedOption === 'to') setTo(e.target.value)
-            else if (selectedOption === 'cc') setCc(e.target.value)
-            else setBcc(e.target.value)
-          }}
+
+      <FormGroup style={{ marginLeft: '20px', marginRight: '20px' }}>
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={selectAll}
+              onChange={handleSelectAllChange}
+              indeterminate={selectedEmails.length > 0 && selectedEmails.length < dummyEmails.length}
+            />
+          }
+          label='Select All'
         />
-      </form>
+
+        {dummyEmails.map(email => (
+          <div key={email} style={{ display: 'flex', justifyContent: 'space-between' }}>
+            <FormControlLabel
+              control={
+                <Checkbox checked={selectedEmails.includes(email)} onChange={() => handleCheckboxChange(email)} />
+              }
+              label={email}
+            />
+            <RadioGroup
+              row
+              value={emailType[email] || 'to'}
+              onChange={e => handleEmailTypeChange(e, email)}
+              style={{ marginLeft: '10px' }}
+            >
+              <FormControlLabel value='to' control={<Radio />} label='To' />
+              <FormControlLabel value='cc' control={<Radio />} label='Cc' />
+              <FormControlLabel value='bcc' control={<Radio />} label='Bcc' />
+            </RadioGroup>
+          </div>
+        ))}
+      </FormGroup>
+
       <DialogActions>
-        <Button onClick={handleCancel} color='primary'>
+        <Select value='' displayEmpty onChange={e => handleAllDropdownChange(e.target.value)}>
+          <MenuItem value='' disabled>
+            All
+          </MenuItem>
+          <MenuItem value='all'>Select All</MenuItem>
+          <MenuItem value='none'>Select None</MenuItem>
+        </Select>
+        <Button onClick={onClose} color='primary'>
           Cancel
         </Button>
-        <Button onClick={handleSend} color='primary'>
+        <Button onClick={handleSendEmail} color='primary'>
           Send
         </Button>
       </DialogActions>

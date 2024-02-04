@@ -29,6 +29,7 @@ import ExcelDumpDialog from '../dialog/ExcelDump/ExcelDumpDialog'
 import TaggingDialog from '../dialog/tagging/TaggingDialog'
 import ImageDialog from '../dialog/image/ImageDialog'
 import EmailDialog from '../dialog/email/EmailDialog'
+import DeleteDialog from '../dialog/delete/DeleteDialog'
 
 // Advanced Search Icon
 const AdvancedSearchIcon = () => (
@@ -256,6 +257,16 @@ const ArticleListToolbar = ({
     setEmailDialogOpen(false)
   }
 
+  const [isDeleteDialogOpen, setDeleteDialogOpen] = useState(false)
+
+  const handleDeleteDialogOpen = () => {
+    setDeleteDialogOpen(true)
+  }
+
+  const handleDeleteDialogClose = () => {
+    setDeleteDialogOpen(false)
+  }
+
   return (
     <Toolbar
       sx={{
@@ -283,9 +294,11 @@ const ArticleListToolbar = ({
         <AdvancedSearchIcon />
       </Button>
       <AdvancedSearchForm open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClose} />
-      <Button onClick={handleDelete} sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleDeleteDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <DeleteIcon />
       </Button>
+      <DeleteDialog open={isDeleteDialogOpen} onClose={handleDeleteDialogClose} />
+
       <Button onClick={handleEmailDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <EmailIcon />
       </Button>
