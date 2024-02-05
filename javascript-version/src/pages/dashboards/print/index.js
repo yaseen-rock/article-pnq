@@ -1,6 +1,7 @@
 // ** Next Import
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
@@ -97,7 +98,7 @@ const ChartJS = () => {
           subtitle={<Typography sx={{ color: 'text.secondary' }}>React wrapper for Chart.js</Typography>}
         />
         <Grid item xs={12}>
-          <ArticleCountDistribution companyData={calculateArticleCountsByCompany(articles)} />
+          <ArticleCountDistribution />
         </Grid>
         <Grid item xs={12}>
           <ChartjsLineChart
