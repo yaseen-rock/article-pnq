@@ -160,7 +160,7 @@ const ChartjsLineChart = props => {
     }
   }
 
-  const fetchPrinMediaCoverage = async () => {
+  const fetchPrintMediaCoverage = async () => {
     let headers = {
       Authorization: `Bearer ${storedToken}`,
       'Content-Type': 'application/json'
@@ -207,7 +207,7 @@ const ChartjsLineChart = props => {
     fetchPriorityPrintMediaCoverage()
   }, [])
   useEffect(() => {
-    fetchPrinMediaCoverage()
+    fetchPrintMediaCoverage()
   }, [companyIds])
   useEffect(() => {
     if (priorityCompanyListByClients.length > 0) {
