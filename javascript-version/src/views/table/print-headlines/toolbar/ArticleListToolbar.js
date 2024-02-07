@@ -22,14 +22,31 @@ import Box from '@mui/material/Box'
 import SvgIcon from '@mui/material/SvgIcon'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import dayjs from 'dayjs'
-import Tooltip from '@mui/material/Tooltip'
+
 import AdvancedSearchForm from '../dialog/advanceSearch/AdvancedSearchForm'
-import DownloadDialog from '../dialog/dossierDownload/DownloadDialog'
+import DossierDialog from '../dialog/dossierDownload/DossierDialog'
 import ExcelDumpDialog from '../dialog/ExcelDump/ExcelDumpDialog'
 import TaggingDialog from '../dialog/tagging/TaggingDialog'
 import ImageDialog from '../dialog/image/ImageDialog'
 import EmailDialog from '../dialog/email/EmailDialog'
 import DeleteDialog from '../dialog/delete/DeleteDialog'
+import RssFeedDialog from '../dialog/RssFeed/RssFeedDialog'
+
+import Menu from '@mui/material/Menu'
+import MenuItem from '@mui/material/MenuItem'
+import Tooltip, { tooltipClasses } from '@mui/material/Tooltip'
+import { styled } from '@mui/material/styles'
+
+const CustomTooltip = styled(({ className, ...props }) => <Tooltip {...props} classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.primary.main, // Set the background color to the primary theme color
+      color: theme.palette.common.white, // Set the text color to white or another suitable color
+      boxShadow: theme.shadows[1],
+      fontSize: 12
+    }
+  })
+)
 
 // Advanced Search Icon
 const AdvancedSearchIcon = () => (
@@ -68,7 +85,7 @@ const TaggingIcon = () => (
 )
 
 // Sort By Icon
-const SortByIcon = () => (
+const SortByIcon = ({ handleSortByLatest, handleSortByMedia }) => (
   <SvgIcon>
     <svg xmlns='http://www.w3.org/2000/svg' width='32' height='27' viewBox='0 0 36 36'>
       <path
@@ -92,7 +109,11 @@ const SortByIcon = () => (
 )
 
 // Publication Type Icon
-const PublicationTypeIcon = () => (
+const PublicationTypeIcon = ({
+  handlePublicationTypeAll,
+  handlePublicationTypeNews,
+  handlePublicationTypeMagazine
+}) => (
   <SvgIcon>
     <svg xmlns='http://www.w3.org/2000/svg' width='32' height='32' viewBox='0 0 24 24'>
       <path
@@ -106,7 +127,15 @@ const PublicationTypeIcon = () => (
 )
 
 // Edition Type Icon
-const EditionTypeIcon = () => (
+const EditionTypeIcon = ({
+  handleEditionTypeBD,
+  handleEditionTypeBIM,
+  handleEditionTypeND,
+  handleEditionTypePIMRD,
+  handleEditionTypeTAP,
+  handleEditionTypeTM,
+  handleEditionTypeWP
+}) => (
   <SvgIcon>
     <svg xmlns='http://www.w3.org/2000/svg' width='25' height='25' viewBox='0 0 24 24'>
       <path
@@ -207,14 +236,14 @@ const ArticleListToolbar = ({
     setAdvancedSearchOpen(false)
   }
 
-  const [downloadDialogOpen, setDownloadDialogOpen] = React.useState(false)
+  const [dossierDialogOpen, setDossierDialogOpen] = React.useState(false)
 
-  const handleDownloadDialogOpen = () => {
-    setDownloadDialogOpen(true)
+  const handleDossierDialogOpen = () => {
+    setDossierDialogOpen(true)
   }
 
-  const handleDownloadDialogClose = () => {
-    setDownloadDialogOpen(false)
+  const handleDossierDialogClose = () => {
+    setDossierDialogOpen(false)
   }
 
   const [excelDumpDialogOpen, setExcelDumpDialogOpen] = React.useState(false)
@@ -267,6 +296,109 @@ const ArticleListToolbar = ({
     setDeleteDialogOpen(false)
   }
 
+  const [isRssFeedDialogOpen, setRssFeedDialogOpen] = useState(false)
+
+  const handleRssFeedDialogOpen = () => {
+    setRssFeedDialogOpen(true)
+  }
+
+  const handleRssFeedDialogClose = () => {
+    setRssFeedDialogOpen(false)
+  }
+
+  //sortby
+  const [isSortByMenuOpen, setSortByMenuOpen] = useState(null)
+
+  const handleSortByClick = event => {
+    setSortByMenuOpen(event.currentTarget)
+  }
+
+  const handleSortByClose = () => {
+    setSortByMenuOpen(null)
+  }
+
+  const handleSortByLatest = () => {
+    // Implement the logic to sort by latest
+    handleSortByClose()
+  }
+
+  const handleSortByMedia = () => {
+    // Implement the logic to sort by media
+    handleSortByClose()
+  }
+
+  //publicationType mangzine
+  const [isPublicationTypeMenuOpen, setPublicationTypeMenuOpen] = useState(null)
+
+  const handlePublicationTypeClick = event => {
+    setPublicationTypeMenuOpen(event.currentTarget)
+  }
+
+  const handlePublicationTypeClose = () => {
+    setPublicationTypeMenuOpen(null)
+  }
+
+  const handlePublicationTypeAll = () => {
+    // Implement the logic for "All" publication type
+    handlePublicationTypeClose()
+  }
+
+  const handlePublicationTypeNews = () => {
+    // Implement the logic for "News" publication type
+    handlePublicationTypeClose()
+  }
+
+  const handlePublicationTypeMagazine = () => {
+    // Implement the logic for "Magazine" publication type
+    handlePublicationTypeClose()
+  }
+
+  //EditionTypeIcon
+  const [isEditionTypeMenuOpen, setEditionTypeMenuOpen] = useState(null)
+
+  const handleEditionTypeClick = event => {
+    setEditionTypeMenuOpen(event.currentTarget)
+  }
+
+  const handleEditionTypeClose = () => {
+    setEditionTypeMenuOpen(null)
+  }
+
+  const handleEditionTypeBD = () => {
+    // Implement the logic for "BD" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypeBIM = () => {
+    // Implement the logic for "BIM" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypeND = () => {
+    // Implement the logic for "ND" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypePIMRD = () => {
+    // Implement the logic for "PIMRD" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypeTAP = () => {
+    // Implement the logic for "TAP" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypeTM = () => {
+    // Implement the logic for "TM" edition type
+    handleEditionTypeClose()
+  }
+
+  const handleEditionTypeWP = () => {
+    // Implement the logic for "WP" edition type
+    handleEditionTypeClose()
+  }
+
   return (
     <Toolbar
       sx={{
@@ -290,9 +422,11 @@ const ArticleListToolbar = ({
       <Button onClick={toggleSearchBarVisibility} sx={{ color: primaryColor, mr: 0 }}>
         <SearchIcon />
       </Button> */}
-      <Button sx={{ color: primaryColor, mr: 0 }} onClick={handleAdvancedSearchOpen}>
-        <AdvancedSearchIcon />
-      </Button>
+      <CustomTooltip title='Advance Search'>
+        <Button sx={{ color: primaryColor, mr: 0 }} onClick={handleAdvancedSearchOpen}>
+          <AdvancedSearchIcon />
+        </Button>
+      </CustomTooltip>
       <AdvancedSearchForm open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClose} />
       <Button onClick={handleDeleteDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <DeleteIcon />
@@ -311,13 +445,17 @@ const ArticleListToolbar = ({
       {/* Add the ImageDialog component */}
       <ImageDialog open={isImageDialogOpen} handleClose={handleImageDialogClose} selectedArticles={selectedArticles} />
 
-      <Button onClick={handleDownloadDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleDossierDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <DownloadIcon />
       </Button>
 
       {/* Add the DownloadDialog component */}
-      <DownloadDialog open={downloadDialogOpen} handleClose={handleDownloadDialogClose} />
-
+      <DossierDialog
+        open={dossierDialogOpen}
+        handleClose={handleDossierDialogClose}
+        selectedStartDate={selectedStartDate}
+        selectedEndDate={selectedEndDate}
+      />
       <Button onClick={handleExcelDumpDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <ExcelDumpIcon />
       </Button>
@@ -325,24 +463,52 @@ const ArticleListToolbar = ({
       {/* Add the ExcelDumpDialog component */}
       <ExcelDumpDialog open={excelDumpDialogOpen} handleClose={handleExcelDumpDialogClose} />
 
-      <Button onClick={handleRssFeed} sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleRssFeedDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <RssFeedIcon />
       </Button>
+      <RssFeedDialog
+        open={isRssFeedDialogOpen}
+        handleClose={handleRssFeedDialogClose}
+        selectedArticles={selectedArticles}
+      />
+
       <Button onClick={handleTaggingDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
         <TaggingIcon />
       </Button>
       {/* Render the TaggingDialog with the open state and onClose function */}
       <TaggingDialog open={taggingDialogOpen} onClose={handleTaggingDialogClose} />
 
-      <Button sx={{ color: primaryColor, mr: 0 }}>
+      <Button onClick={handleSortByClick} sx={{ color: primaryColor, mr: 0 }}>
         <SortByIcon />
       </Button>
-      <Button sx={{ color: primaryColor, mr: 0 }}>
+      <Menu anchorEl={isSortByMenuOpen} open={Boolean(isSortByMenuOpen)} onClose={handleSortByClose}>
+        <MenuItem onClick={handleSortByLatest}>Sort by Latest</MenuItem>
+        <MenuItem onClick={handleSortByMedia}>Sort by Media</MenuItem>
+      </Menu>
+      <Button onClick={handlePublicationTypeClick} sx={{ color: primaryColor, mr: 0 }}>
         <PublicationTypeIcon />
       </Button>
-      <Button sx={{ color: primaryColor, mr: 0 }}>
+      <Menu
+        anchorEl={isPublicationTypeMenuOpen}
+        open={Boolean(isPublicationTypeMenuOpen)}
+        onClose={handlePublicationTypeClose}
+      >
+        <MenuItem onClick={handlePublicationTypeAll}>All</MenuItem>
+        <MenuItem onClick={handlePublicationTypeNews}>News</MenuItem>
+        <MenuItem onClick={handlePublicationTypeMagazine}>Magazine</MenuItem>
+      </Menu>
+      <Button onClick={handleEditionTypeClick} sx={{ color: primaryColor, mr: 0 }}>
         <EditionTypeIcon />
       </Button>
+      <Menu anchorEl={isEditionTypeMenuOpen} open={Boolean(isEditionTypeMenuOpen)} onClose={handleEditionTypeClose}>
+        <MenuItem onClick={handleEditionTypeBD}>BD</MenuItem>
+        <MenuItem onClick={handleEditionTypeBIM}>BIM</MenuItem>
+        <MenuItem onClick={handleEditionTypeND}>ND</MenuItem>
+        <MenuItem onClick={handleEditionTypePIMRD}>PIMRD</MenuItem>
+        <MenuItem onClick={handleEditionTypeTAP}>TAP</MenuItem>
+        <MenuItem onClick={handleEditionTypeTM}>TM</MenuItem>
+        <MenuItem onClick={handleEditionTypeWP}>WP</MenuItem>
+      </Menu>
       <Button onClick={openFilterPopover} sx={{ color: primaryColor, mr: 0 }}>
         <DateRangeIcon />
       </Button>
