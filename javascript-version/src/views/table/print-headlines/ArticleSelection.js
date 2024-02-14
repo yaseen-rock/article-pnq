@@ -31,7 +31,28 @@ import CircularProgress from '@mui/material/CircularProgress'
 import { useSelector } from 'react-redux' // Import useSelector from react-redux
 import { selectSelectedClient } from 'src/store/apps/user/userSlice'
 
-// ** Renders social feed column
+// ** Tooltip
+import Tooltip from '@mui/material/Tooltip'
+import { styled } from '@mui/system'
+import { List, ListItem } from '@mui/material'
+import { tooltipClasses } from '@mui/material/Tooltip'
+
+// Your CustomTooltip component
+const CustomTooltip = styled(({ className, ...props }) => <Tooltip {...props} classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.background.default, // Use default background color for dark theme
+      color: theme.palette.text.primary, // Use primary text color for dark theme
+      boxShadow: theme.shadows[1],
+      fontSize: 11,
+      maxWidth: '300px', // Set the maximum width for better readability
+      '& .MuiTooltip-arrow': {
+        color: theme.palette.background.default // Use default background color for the arrow in dark theme
+      }
+    }
+  })
+)
+
 const renderArticle = params => {
   const { row } = params
 
@@ -39,20 +60,48 @@ const renderArticle = params => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-      <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
-        {row.headline}
-      </Typography>
+      <CustomTooltip title={getTooltipContent(row)} arrow>
+        <Typography noWrap variant='body2' sx={{ color: 'text.primary', fontWeight: 600 }}>
+          {row.headline}
+        </Typography>
+      </CustomTooltip>
       <Typography noWrap variant='caption'>
-        {row.publisher}
+        {row.publication}
         <span style={{ marginLeft: '4px' }}>({formattedDate})</span>
-      </Typography>
-      {/* Displaying the summary */}
-      <Typography noWrap variant='caption'>
-        {row.summary}
       </Typography>
     </Box>
   )
 }
+
+// Function to generate tooltip content using List
+const getTooltipContent = row => (
+  <List>
+    <ListItem>
+      <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
+        Summary:
+      </Typography>
+    </ListItem>
+    <ListItem>{row.summary}</ListItem>
+    <ListItem>
+      <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
+        Companies:
+      </Typography>{' '}
+      {row.companies.length > 1 ? row.companies.map(company => company.name).join(', ') : row.companies[0]?.name}
+    </ListItem>
+    <ListItem>
+      <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
+        Edition Type:
+      </Typography>{' '}
+      {row.editionTypeName}
+    </ListItem>
+    <ListItem>
+      <Typography variant='body2' sx={{ fontWeight: 600, color: 'primary.main' }}>
+        Page Number:
+      </Typography>{' '}
+      {row.pageNumber}
+    </ListItem>
+  </List>
+)
 
 const TableSelection = () => {
   const articleColumns = [

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react'
-import axios from 'axios'
 import Toolbar from '@mui/material/Toolbar'
 import Button from '@mui/material/Button'
 import Box from '@mui/material/Box'
@@ -8,119 +7,102 @@ import Typography from '@mui/material/Typography'
 import CardHeader from '@mui/material/CardHeader'
 import TrendingUpIcon from '@mui/icons-material/TrendingUp'
 import Grid from '@mui/material/Grid'
-import CircularProgress from '@mui/material/CircularProgress'
+import axios from 'axios'
 import Table from '@mui/material/Table'
-import TableBody from '@mui/material/TableBody'
-import TableCell from '@mui/material/TableCell'
-import TableContainer from '@mui/material/TableContainer'
+import TableHead from '@mui/material/TableHead'
 import TableRow from '@mui/material/TableRow'
+import TableCell from '@mui/material/TableCell'
+import TableBody from '@mui/material/TableBody'
+import CircularProgress from '@mui/material/CircularProgress'
 
 // ** Redux
-import { useSelector } from 'react-redux'
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
 import { selectSelectedClient } from 'src/store/apps/user/userSlice'
+
+// ** Tooltip
+import Tooltip from '@mui/material/Tooltip'
+import { styled } from '@mui/system'
+import { tooltipClasses } from '@mui/material/Tooltip'
+
+// Your CustomTooltip component
+const CustomTooltip = styled(({ className, ...props }) => <Tooltip {...props} classes={{ popper: className }} />)(
+  ({ theme }) => ({
+    [`& .${tooltipClasses.tooltip}`]: {
+      backgroundColor: theme.palette.background.default, // Use default background color for dark theme
+      color: theme.palette.text.primary, // Use primary text color for dark theme
+      boxShadow: theme.shadows[1],
+      fontSize: 13,
+      maxWidth: '300px', // Set the maximum width for better readability
+      '& .MuiTooltip-arrow': {
+        color: theme.palette.background.default // Use default background color for the arrow in dark theme
+      }
+    }
+  })
+)
 
 const CardSelection = () => {
   const [isContainerOpen, setContainerOpen] = useState(false)
-  const [companies, setCompanies] = useState([])
-  const [articles, setArticles] = useState([])
+  const [companyData, setCompanyData] = useState([])
   const [loading, setLoading] = useState(true)
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
 
-  const fetchArticlesForCompanies = async companyIds => {
+  const fetchlatestArticlesForCompetition = async () => {
     try {
+      setLoading(true)
       const storedToken = localStorage.getItem('accessToken')
+      if (storedToken) {
+        const response = await axios.get('http://51.68.220.77:8001/latestArticlesForCompetition/', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: {
+            clientId: clientId
+          }
+        })
 
-      const articlesPromises = companyIds.map(companyId =>
-        axios
-          .get('http://51.68.220.77:8001/latestArticlesForClientCompany/', {
-            headers: {
-              Authorization: `Bearer ${storedToken}`
-            },
-            params: {
-              clientId: clientId,
-              companyId: companyId
-            }
-          })
-          .then(response => {
-            console.log(`Received response for company ${companyId}:`, response?.data?.articles || [])
-
-            return response
-          })
-          .catch(error => {
-            console.error(`Error fetching articles for company ${companyId}:`, error)
-
-            return null
-          })
-      )
-
-      console.log('Sending requests for news articles for all companies...')
-
-      articlesPromises.forEach((promise, index) => {
-        const companyId = companyIds[index]
-        console.log(`Sending request for company ${companyId}...`)
-      })
-
-      const articlesResponses = await Promise.all(articlesPromises)
-
-      console.log('Received responses for news articles for all companies:', articlesResponses)
-
-      const allArticles = articlesResponses.flatMap(response => response?.data?.articles || [])
-      setArticles(allArticles.slice(0, 5))
-
-      return articlesResponses
+        // Sort the companies with articles first
+        const sortedCompanies = response.data.companies.sort((a, b) => b.articles.length - a.articles.length)
+        setCompanyData(sortedCompanies)
+      }
     } catch (error) {
-      console.error('Error fetching articles:', error)
-
-      return null
+      console.error('Error fetching data:', error)
+    } finally {
+      setLoading(false)
     }
   }
 
-  useEffect(() => {
-    const fetchUserDataAndCompanies = async () => {
-      try {
-        setLoading(true)
-        const storedToken = localStorage.getItem('accessToken')
-        if (storedToken && clientId) {
-          const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
-            headers: {
-              Authorization: `Bearer ${storedToken}`
-            },
-            params: {
-              clientId: clientId
-            }
-          })
-          setCompanies(response.data.companies)
-
-          const companyIds = response.data.companies.map(company => company.companyId)
-          const articlesResponses = await fetchArticlesForCompanies(companyIds)
-          setLoading(false)
-        } else {
-          setCompanies([])
-          setArticles([])
-          setLoading(false)
-        }
-      } catch (error) {
-        console.error('Error fetching data:', error)
-        setLoading(false)
-      }
-    }
-
-    fetchUserDataAndCompanies()
-  }, [clientId])
-
   const handleOpenContainer = () => {
+    fetchlatestArticlesForCompetition()
     setContainerOpen(true)
   }
 
+  useEffect(() => {
+    fetchlatestArticlesForCompetition()
+  }, [clientId])
+
   const handleCloseContainer = () => {
     setContainerOpen(false)
+    setLoading(true)
+  }
+
+  // Function to format the date (Feb 14,24)
+  const formatDate = rawDate => {
+    const date = new Date(rawDate)
+    const month = date.toLocaleString('default', { month: 'short' })
+    const day = date.getDate()
+    const year = date.getFullYear().toString().slice(-2) // Get the last two digits of the year
+
+    return `${month} ${day},${year}`
   }
 
   return (
     <Card>
       <Toolbar>
-        <Button startIcon={<TrendingUpIcon />} onClick={handleOpenContainer}>
+        <Button
+          startIcon={<TrendingUpIcon />} // Icon placed inside the button
+          onClick={handleOpenContainer}
+        >
           Latest Competitive News
         </Button>
       </Toolbar>
@@ -128,47 +110,39 @@ const CardSelection = () => {
       {isContainerOpen && (
         <>
           {loading ? (
-            <Box display='flex' justifyContent='center' alignItems='center' height={300}>
+            <Box display='flex' justifyContent='center' alignItems='center' height='200px'>
               <CircularProgress />
             </Box>
           ) : (
             <Grid container spacing={2} justifyContent='center' p={4}>
-              {companies.map((company, index) => (
-                <Grid item xs={12} sm={6} md={4} lg={3} key={index}>
-                  <Card sx={{ width: '100%', height: '100%', textAlign: 'center' }}>
+              {companyData.map(company => (
+                <Grid item xs={12} sm={6} md={4} key={company.companyId}>
+                  <Card sx={{ width: '100%', textAlign: 'center' }}>
                     <CardHeader title={company.companyName} />
-                    <Typography variant='body1'>{company.description}</Typography>
-                    {articles
-                      .filter(article => article.companies.some(comp => comp.id === company.companyId))
-                      .map((article, articleIndex) => (
-                        <TableContainer key={articleIndex}>
-                          <Table>
-                            <TableBody>
-                              <TableRow>
-                                <TableCell>
-                                  <div>
-                                    <Typography variant='h6'>{article.headline}</Typography>
-                                  </div>
-                                  <div>
-                                    <Typography variant='body2'>
-                                      {`${article.publication} - (${new Date(article.articleDate).toLocaleDateString(
-                                        'en-US',
-                                        {
-                                          month: 'short',
-                                          day: 'numeric',
-                                          year: 'numeric'
-                                        }
-                                      )})`}
-                                    </Typography>
-                                  </div>
-                                </TableCell>
-                              </TableRow>
-                            </TableBody>
-                          </Table>
-                        </TableContainer>
-                      ))}
-                    {articles.filter(article => article.companies.some(comp => comp.id === company.companyId))
-                      .length === 0 && <Typography variant='body2'>No latest competition news</Typography>}
+                    {company.articles.length > 0 ? (
+                      <Table>
+                        <TableBody>
+                          {company.articles.map(article => (
+                            <TableRow key={article.articleId}>
+                              <TableCell sx={{ whiteSpace: 'nowrap' }}>
+                                <CustomTooltip
+                                  title={article.headline}
+                                  arrow
+                                  arrowPlacement='bottom'
+                                  placement='bottom-start' // Adjust the placement as needed
+                                >
+                                  <span>{article.headline}</span>
+                                </CustomTooltip>
+                                <br />
+                                {`${article.publication} -  (${formatDate(article.articleDate)})`}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    ) : (
+                      <Typography variant='body1'>No articles available</Typography>
+                    )}
                   </Card>
                 </Grid>
               ))}
