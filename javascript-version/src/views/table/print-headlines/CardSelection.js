@@ -44,6 +44,7 @@ const CardSelection = () => {
   const [isContainerOpen, setContainerOpen] = useState(false)
   const [companyData, setCompanyData] = useState([])
   const [loading, setLoading] = useState(true)
+  const [loadingArticleId, setLoadingArticleId] = useState(null)
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
 
@@ -69,6 +70,58 @@ const CardSelection = () => {
       console.error('Error fetching data:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchReadArticleFile = async (articleId, fileType) => {
+    try {
+      setLoadingArticleId(articleId)
+      const storedToken = localStorage.getItem('accessToken')
+      if (storedToken) {
+        const base_url = 'http://51.68.220.77:8001'
+
+        const request_params = {
+          articleId: articleId,
+          fileType: fileType
+        }
+
+        const response = await axios.get(`${base_url}/readArticleFile/`, {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: request_params,
+          responseType: 'json' // Set the responseType to 'json' since it's base64-encoded
+        })
+
+        // Check if the response contains valid content
+        if (response.data && response.data.fileContent) {
+          const base64Content = response.data.fileContent
+
+          // Decode the base64 content
+          const decodedContent = atob(base64Content)
+
+          // Convert the decoded content to Uint8Array
+          const uint8Array = new Uint8Array(decodedContent.length)
+          for (let i = 0; i < decodedContent.length; i++) {
+            uint8Array[i] = decodedContent.charCodeAt(i)
+          }
+
+          // Create a Blob from Uint8Array
+          const blob = new Blob([uint8Array], { type: 'application/pdf' })
+
+          // Create a Blob URL for the PDF
+          const pdfUrl = URL.createObjectURL(blob)
+
+          // Open the PDF in a new tab
+          window.open(pdfUrl, '_blank')
+        } else {
+          console.log('Empty or invalid content in the response.')
+        }
+      }
+    } catch (error) {
+      console.error('Error fetching read Article File:', error)
+    } finally {
+      setLoadingArticleId(null)
     }
   }
 
@@ -131,10 +184,16 @@ const CardSelection = () => {
                                   arrowPlacement='bottom'
                                   placement='bottom-start' // Adjust the placement as needed
                                 >
-                                  <span>{article.headline}</span>
+                                  <span
+                                    style={{ cursor: 'pointer' }}
+                                    onClick={() => fetchReadArticleFile(article.articleId, 'pdf')}
+                                  >
+                                    {article.headline}
+                                  </span>
                                 </CustomTooltip>
                                 <br />
                                 {`${article.publication} -  (${formatDate(article.articleDate)})`}
+                                {loadingArticleId === article.articleId && <CircularProgress size={17} />}
                               </TableCell>
                             </TableRow>
                           ))}
