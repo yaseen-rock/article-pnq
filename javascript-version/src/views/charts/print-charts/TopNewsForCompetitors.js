@@ -1,5 +1,8 @@
 // ** React Imports
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+
+// ** day formatting
+import dayjs from 'dayjs'
 
 // ** MUI Imports
 import Card from '@mui/material/Card'
@@ -12,82 +15,95 @@ import Select from '@mui/material/Select'
 import FormControl from '@mui/material/FormControl'
 import InputLabel from '@mui/material/InputLabel'
 import OutlinedInput from '@mui/material/OutlinedInput'
+import CircularProgress from '@mui/material/CircularProgress'
+import Box from '@mui/material/Box'
+import axios from 'axios'
+
+// ** Redux
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
+import { selectSelectedClient } from 'src/store/apps/user/userSlice'
 
 const TopNewsForCompetitors = () => {
   const [topNews, setTopNews] = useState([])
-
+  const [competitors, setCompetitors] = useState([])
   const [selectedCompetitor, setSelectedCompetitor] = useState('')
+  const [loading, setLoading] = useState(false)
+  let limit = 0
+  const selectedClient = useSelector(selectSelectedClient)
+  const clientId = selectedClient ? selectedClient.clientId : null
 
-  const newsForCompetitors = {
-    TATA: [
-      {
-        title:
-          'Chips to Startup programme underway; electronics manufacturing to hit $300 billion by 2026: IT MoS, ET Telecom',
-        source: 'indiatimes.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'TATA Motors unveils new electric vehicle with advanced features',
-        source: 'business-standard.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'TATA Group announces partnership with leading tech company for AI-driven innovations',
-        source: 'technews.com',
-        date: 'Dec 07,23'
-      }
-    ],
-    INFOSYS: [
-      {
-        title: 'INFOSYS reports strong quarterly earnings, beats market expectations',
-        source: 'moneycontrol.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'INFOSYS launches new digital transformation solutions for businesses',
-        source: 'forbes.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'INFOSYS recognized as a top employer in the IT industry',
-        source: 'timesofindia.com',
-        date: 'Dec 07,23'
-      }
-    ],
-    IKEA: [
-      {
-        title: 'IKEA introduces sustainable furniture line with eco-friendly materials',
-        source: 'homedesignmagazine.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'IKEA to open new flagship store in major city, creating jobs and boosting local economy',
-        source: 'retailnews.com',
-        date: 'Dec 07,23'
-      },
-      {
-        title: 'IKEA collaborates with renowned designer for exclusive home decor collection',
-        source: 'architecturaldigest.com',
-        date: 'Dec 07,23'
-      }
-    ]
-
-    // Add news for other competitors here
+  const getFormattedDate = inputDateString => {
+    return dayjs(inputDateString).format('D MMMM YYYY')
   }
 
-  const competitors = Object.keys(newsForCompetitors)
+  //fetching competitors
+  useEffect(() => {
+    const fetchUserDataAndCompanies = async () => {
+      try {
+        const storedToken = localStorage.getItem('accessToken')
+        if (storedToken) {
+          const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            },
+            params: {
+              clientId: clientId
+            }
+          })
+          setCompetitors(response.data.companies)
+        }
+      } catch (error) {
+        console.error('Error fetching user data and companies:', error)
+      }
+    }
+
+    fetchUserDataAndCompanies()
+  }, [clientId])
+
+  // fetching top news basis on competitor
+  useEffect(() => {
+    const fetchLatestArticlesForCompetition = async () => {
+      try {
+        setLoading(true)
+        const storedToken = localStorage.getItem('accessToken')
+        if (storedToken) {
+          const response = await axios.get('http://51.68.220.77:8001/latestArticlesForCompetition/', {
+            headers: {
+              Authorization: `Bearer ${storedToken}`
+            },
+            params: {
+              clientId: clientId,
+              companyId: selectedCompetitor,
+              limit
+            }
+          })
+
+          const companies = response?.data?.companies
+          if (companies) {
+            const articles = companies.map(item => item.articles)
+            setTopNews(...articles)
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user data and companies:', error)
+        setLoading(false)
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchLatestArticlesForCompetition()
+  }, [selectedCompetitor, clientId, limit])
+
+  // const competitors = Object.keys(newsForCompetitors)
 
   const handleCompetitorChange = event => {
     setSelectedCompetitor(event.target.value)
-
-    // Set top news for the selected competitor
-    setTopNews(newsForCompetitors[event.target.value])
   }
 
   return (
     <Card>
       <CardHeader title='Top News for Competitor Today' />
-
       <CardContent>
         <FormControl fullWidth variant='outlined' sx={{ marginBottom: 2 }}>
           <InputLabel id='competitor-label'>Select Competitor</InputLabel>
@@ -99,24 +115,41 @@ const TopNewsForCompetitors = () => {
             input={<OutlinedInput label='Select Competitor' />}
           >
             {competitors.map(competitor => (
-              <MenuItem key={competitor} value={competitor}>
-                {competitor}
+              <MenuItem key={competitor.companyId} value={competitor.companyId}>
+                {competitor.companyName}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
-
-        {topNews.map((news, index) => (
-          <div key={index}>
-            <Typography variant='h6' gutterBottom>
-              {news.title}
-            </Typography>
-            <Typography variant='subtitle2' color='textSecondary' gutterBottom>
-              {news.source}, {news.date}
-            </Typography>
-            {index !== topNews.length - 1 && <Divider sx={{ marginY: 2 }} variant='middle' />}{' '}
-          </div>
-        ))}
+        <>
+          {loading ? (
+            <Box>
+              <CircularProgress />
+            </Box>
+          ) : topNews?.length > 0 ? (
+            topNews.map(news => (
+              <div key={news.articleId}>
+                <Typography
+                  variant='h6'
+                  gutterBottom
+                  sx={{
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }}
+                >
+                  {news.headline}
+                </Typography>
+                <Typography variant='subtitle2' color='textSecondary' gutterBottom>
+                  {news.publication}, {getFormattedDate(news.articleDate)}
+                </Typography>
+                {topNews.length - 1 && <Divider sx={{ marginY: 2 }} variant='fullWidth' />}{' '}
+              </div>
+            ))
+          ) : (
+            <Typography variant='body2'>No news available.</Typography>
+          )}
+        </>
       </CardContent>
     </Card>
   )

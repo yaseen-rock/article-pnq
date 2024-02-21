@@ -14,9 +14,11 @@ import TableRow from '@mui/material/TableRow'
 import IconButton from '@mui/material/IconButton'
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft'
 import ChevronRightIcon from '@mui/icons-material/ChevronRight'
+import DownloadIcon from '@mui/icons-material/Download'
 import Box from '@mui/material/Box'
 import Grid from '@mui/material/Grid'
 import axios from 'axios'
+import * as XLSX from 'xlsx'
 
 // ** Redux
 import { useSelector } from 'react-redux' // Import useSelector from react-redux
@@ -103,9 +105,44 @@ const ArticleCountDistribution = () => {
     setCurrentPage(prev => prev - 1)
   }
 
+  const handleDownload = () => {
+    if (printArticleCountDistribution && printArticleCountDistribution.length > 0) {
+      const flattenData = printArticleCountDistribution.map(item => {
+        return {
+          'Company ID': item.company.id,
+          'Company Name': item.company.name,
+          'Tier 1 Today': item.countTier1.today,
+          'Tier 1 Last Week': item.countTier1.lastWeek,
+          'Tier 1 Last Month': item.countTier1.lastMonth,
+          'Tier 1 Last Three Months': item.countTier1.lastThreeMonth,
+          'Overall Today': item.countOverall.today,
+          'Overall Last Week': item.countOverall.lastWeek,
+          'Overall Last Month': item.countOverall.lastMonth,
+          'Overall Last Three Months': item.countOverall.lastThreeMonth
+        }
+      })
+
+      if (flattenData.length > 0) {
+        const ws = XLSX.utils.json_to_sheet(flattenData)
+        const wb = XLSX.utils.book_new()
+        XLSX.utils.book_append_sheet(wb, ws, 'Sheet 1')
+        XLSX.writeFile(wb, 'exported_data.xlsx')
+      } else {
+        console.error('No valid data is available for download.')
+      }
+    } else {
+      console.error('Data is not available for download.')
+    }
+  }
+
   return (
     <Card>
-      <CardHeader title={`Article Count Distribution`} />
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <CardHeader title={`Article Count Distribution`} />
+        <IconButton onClick={handleDownload} disabled={printArticleCountDistribution?.length <= 0}>
+          <DownloadIcon />
+        </IconButton>
+      </Box>
       <CardContent>
         <Slider ref={sliderRef} {...settings}>
           {printArticleCountDistribution.map(article => (

@@ -3,15 +3,24 @@ import Card from '@mui/material/Card'
 import CardHeader from '@mui/material/CardHeader'
 import CardContent from '@mui/material/CardContent'
 import Select from '@mui/material/Select'
+import Menu from '@mui/material/Menu'
 import MenuItem from '@mui/material/MenuItem'
 import InputLabel from '@mui/material/InputLabel'
 import FormControl from '@mui/material/FormControl'
+import DownloadIcon from '@mui/icons-material/Download'
+import Box from '@mui/material/Box'
+import Button from '@mui/material/Button'
 import axios from 'axios'
+import CircularProgress from '@mui/material/CircularProgress'
 import { useState, useEffect } from 'react'
 
 // ** Redux
 import { useSelector } from 'react-redux' // Import useSelector from react-redux
 import { selectSelectedClient } from 'src/store/apps/user/userSlice'
+
+// ** third party imports
+import html2canvas from 'html2canvas'
+import jsPDF from 'jspdf'
 
 // ** Third Party Imports
 import { Line } from 'react-chartjs-2'
@@ -23,15 +32,15 @@ const ChartjsLineChart = props => {
   const [companyListByClients, setCompanyListByClients] = useState([])
   const [priorityLargestCountForYaxis, setPriorityLargestCountForYaxis] = useState(0)
   const [largestCountForYaxis, setLargestCountForYaxis] = useState(0)
+  const [downloadAnchor, setDownloadAnchor] = useState(null)
+  const [loadingJPG, setLoadingJPG] = useState(false)
+  const [loadingPDF, setLoadingPDF] = useState(false)
 
   const BASE_URL = 'http://51.68.220.77:8001'
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
   const storedToken = localStorage.getItem('accessToken')
   const priorityCompanyId = selectedClient ? selectedClient.priorityCompanyId : ''
-
-  console.log(clientId)
-  console.log(priorityCompanyId)
 
   // let priorityCompanyName = 'TATA CONSTRUCTION & PROJECTS PROJECTS'
   useEffect(() => {
@@ -165,14 +174,11 @@ const ChartjsLineChart = props => {
         }
       } catch (error) {
         console.error('Error fetching user data and companies:', error)
-
-        // Handle error, maybe set an error state or display an error message
       }
     }
 
     fetchUserDataAndCompanies()
   }, [clientId])
-
   function fetchPriorityPrintMediaCoverage() {
     let headers = {
       Authorization: `Bearer ${storedToken}`,
@@ -234,13 +240,76 @@ const ChartjsLineChart = props => {
     }
   }, [priorityCompanyListByClients])
 
+  const openDropdown = (event, anchorSetter) => {
+    anchorSetter(event.currentTarget)
+  }
+
+  const closeDropdown = anchorSetter => {
+    anchorSetter(null)
+  }
+
+  // Function to handle JPEG download
+  const handleJPEGDownload = async () => {
+    setLoadingJPG(true)
+    try {
+      const chartContainer = document.getElementById('chart-container')
+
+      if (!chartContainer) {
+        return
+      }
+
+      // Use html2canvas to capture the chart as an image
+      const canvas = await html2canvas(chartContainer)
+
+      // Create a download link for the image
+      const dataURL = canvas.toDataURL('image/jpeg')
+      const link = document.createElement('a')
+      link.href = dataURL
+      link.download = 'chart.jpg'
+
+      // Trigger the download
+      document.body.appendChild(link)
+      link.click()
+
+      setLoadingJPG(false)
+    } catch (error) {
+      console.error('Error generating JPEG:', error)
+      setLoadingJPG(false)
+    }
+  }
+
+  const handlePDFDownload = async () => {
+    setLoadingPDF(true)
+    try {
+      const chartContainer = document.getElementById('chart-container')
+
+      if (!chartContainer) {
+        return
+      }
+
+      // Use html2canvas to capture the chart as an image
+      const canvas = await html2canvas(chartContainer)
+
+      // Create a PDF document
+      const pdf = new jsPDF('p', 'mm', 'a4')
+      pdf.addImage(canvas.toDataURL('image/jpeg'), 'JPEG', 0, 0, 210, 297)
+
+      // Create a download link for the PDF
+      pdf.save('chart.pdf')
+
+      setLoadingPDF(false)
+    } catch (error) {
+      console.error('Error generating PDF:', error)
+      setLoadingPDF(false)
+    }
+  }
+
   return (
-    <Card>
+    <Card sx={{ position: 'relative' }}>
       <CardHeader
         title='Media Coverage'
-        subheader='Commercial networks & enterprises'
         action={
-          <FormControl>
+          <FormControl sx={{ marginLeft: '5rem' }}>
             <InputLabel id='competitor-label'>Select competitor</InputLabel>
             <Select
               label='Select Company'
@@ -259,7 +328,22 @@ const ChartjsLineChart = props => {
           </FormControl>
         }
       />
-      <CardContent>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'end', mr: 3 }}>
+        <Button endIcon={<DownloadIcon />} onClick={e => openDropdown(e, setDownloadAnchor)} color='inherit' />
+      </Box>
+      <Menu open={Boolean(downloadAnchor)} anchorEl={downloadAnchor} onClose={() => closeDropdown(setDownloadAnchor)}>
+        <MenuItem sx={{ cursor: 'pointer' }} onClick={handleJPEGDownload}>
+          <Button disabled={loadingJPG}>
+            {loadingJPG ? <CircularProgress size={24} color='primary' /> : 'Download JPG'}
+          </Button>
+        </MenuItem>
+        <MenuItem sx={{ cursor: 'pointer' }} onClick={handlePDFDownload}>
+          <Button disabled={loadingJPG}>
+            {loadingPDF ? <CircularProgress size={24} color='primary' /> : 'Download PDF'}
+          </Button>
+        </MenuItem>
+      </Menu>
+      <CardContent id='chart-container'>
         <Line data={data} height={400} options={options} />
       </CardContent>
     </Card>

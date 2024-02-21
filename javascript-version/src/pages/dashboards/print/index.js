@@ -1,6 +1,7 @@
 // ** Next Import
 import Link from 'next/link'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import axios from 'axios'
 
 // ** MUI Imports
 import Grid from '@mui/material/Grid'
@@ -14,27 +15,23 @@ import PageHeader from 'src/@core/components/page-header'
 // ** Styled Component
 import DatePickerWrapper from 'src/@core/styles/libs/react-datepicker'
 
+// ** Redux
+import { useSelector } from 'react-redux' // Import useSelector from react-redux
+import { selectSelectedClient } from 'src/store/apps/user/userSlice'
+
 // ** Demo Components Imports
 
-import ChartjsPolarAreaChart from 'src/views/charts/online-charts/ChartjsPolarAreaChart'
-import ChartjsTable from 'src/views/charts/online-charts/ChartjsTable'
+import ChartjsPolarAreaChart from 'src/views/charts/print-charts/ChartjsPolarAreaChart'
+import ChartjsTable from 'src/views/charts/print-charts/ChartjsTable'
 import ChartsAppBar from 'src/views/charts/print-charts/ChartsAppBar'
 import ChartjsLineChart from 'src/views/charts/print-charts/ChartjsLineChart'
 
-import {
-  filterArticlesByDateRange,
-  countArticlesByCompany,
-  calculateShareOfVoice,
-  calculateArticleCountsByCompany
-} from 'src/views/charts/online-charts/articleUtils' // Adjust the import path
-import { articles } from 'src/views/table/data-grid/Db-Articles'
-
 // ** Third Party Styles Import
 import 'chart.js/auto'
-import ChartjsBarChart from 'src/views/charts/online-charts/ChartjsBarChart'
+import ChartjsBarChart from 'src/views/charts/print-charts/ChartjsBarChart'
 import ArticleCountDistribution from 'src/views/charts/print-charts/ArticleCountDistribution'
-import TopNewsToday from 'src/views/charts/online-charts/TopNewsToday'
-import TopNewsForCompetitors from 'src/views/charts/online-charts/TopNewsForCompetitors'
+import TopNewsToday from 'src/views/charts/print-charts/TopNewsToday'
+import TopNewsForCompetitors from 'src/views/charts/print-charts/TopNewsForCompetitors'
 
 const LinkStyled = styled(Link)(({ theme }) => ({
   textDecoration: 'none',
@@ -43,19 +40,36 @@ const LinkStyled = styled(Link)(({ theme }) => ({
 
 const ChartJS = () => {
   const [selectedDateRange, setSelectedDateRange] = useState('')
-  const [tableData, setTableData] = useState([])
+  const [selectedCity, setSelectedCity] = useState([])
   const [shareOfVoiceData, setShareOfVoiceData] = useState([])
 
-  const handleDateRangeChange = range => {
-    setSelectedDateRange(range)
+  const BASE_URL = 'http://51.68.220.77:8001'
+  const selectedClient = useSelector(selectSelectedClient)
+  const clientId = selectedClient ? selectedClient.clientId : null
 
-    const filteredArticles = filterArticlesByDateRange(articles, range)
-    const newTableData = countArticlesByCompany(filteredArticles)
-    const newShareOfVoiceData = calculateShareOfVoice(filteredArticles)
+  const fetchArticlesStatsForCompetition = async () => {
+    try {
+      const storedToken = localStorage.getItem('accessToken')
 
-    setTableData(newTableData)
-    setShareOfVoiceData(newShareOfVoiceData)
+      let headers = {
+        Authorization: `Bearer ${storedToken}`,
+        'Content-Type': 'application/json'
+      }
+      let params = { clientId, dateRange: selectedDateRange, cityId: selectedCity }
+
+      const queryString = Object.keys(params)
+        .map(key => `${encodeURIComponent(key)}=${encodeURIComponent(params[key])}`)
+        .join('&')
+      const URL = `${BASE_URL}/articlesStatsForCompetition?${queryString}`
+      const response = await axios.get(URL, { headers })
+      setShareOfVoiceData(response?.data?.statistics || [])
+    } catch (error) {
+      console.log('Error in fetching article stats for competition', error)
+    }
   }
+  useEffect(() => {
+    fetchArticlesStatsForCompetition()
+  }, [clientId, selectedCity, selectedDateRange])
 
   // ** Hook
   const theme = useTheme()
@@ -94,10 +108,9 @@ const ChartJS = () => {
               </LinkStyled>
             </Typography>
           }
-          subtitle={<Typography sx={{ color: 'text.secondary' }}>React wrapper for Chart.js</Typography>}
         />
         <Grid item xs={12}>
-          <ArticleCountDistribution companyData={calculateArticleCountsByCompany(articles)} />
+          <ArticleCountDistribution />
         </Grid>
         <Grid item xs={12}>
           <ChartjsLineChart
@@ -111,7 +124,11 @@ const ChartJS = () => {
           />
         </Grid>
         <Grid item xs={12}>
-          <ChartsAppBar handleDateRangeChange={handleDateRangeChange} />
+          <ChartsAppBar
+            setSelectedDateRange={setSelectedDateRange}
+            selectedCity={selectedCity}
+            setSelectedCity={setSelectedCity}
+          />
         </Grid>
 
         <Grid item xs={12} md={6}>
@@ -128,11 +145,11 @@ const ChartJS = () => {
           />
         </Grid>
         <Grid item xs={12} md={6}>
-          <ChartjsTable tableData={tableData} />
+          <ChartjsTable tableData={shareOfVoiceData} />
         </Grid>
         <Grid item xs={12}>
           <ChartjsBarChart
-            companyData={tableData} // Pass the company data to the bar chart
+            companyData={shareOfVoiceData} // Pass the company data to the bar chart
             primary={primaryColor}
             labelColor={theme.palette.text.disabled}
             borderColor={theme.palette.divider}
