@@ -6,7 +6,7 @@ import DialogActions from '@mui/material/DialogActions'
 import Button from '@mui/material/Button'
 import TextField from '@mui/material/TextField'
 
-const AdvancedSearchForm = ({ open, onClose }) => {
+const AdvancedSearchForm = ({ open, onClose, setSearchParameters }) => {
   const [searchHeadline, setSearchHeadline] = useState('')
   const [searchBody, setSearchBody] = useState('')
   const [combinationOfWords, setCombinationOfWords] = useState('')
@@ -15,15 +15,66 @@ const AdvancedSearchForm = ({ open, onClose }) => {
   const [ignoreThis, setIgnoreThis] = useState('')
   const [journalist, setJournalist] = useState('')
 
+  const resetFormFields = () => {
+    setSearchHeadline('')
+    setSearchBody('')
+    setCombinationOfWords('')
+    setAnyOfWords('')
+    setExactPhrase('')
+    setIgnoreThis('')
+    setJournalist('')
+
+    // Check if any field has a value before setting searchParams
+    const anyFieldHasValue =
+      searchHeadline || searchBody || combinationOfWords || anyOfWords || exactPhrase || ignoreThis || journalist
+
+    if (anyFieldHasValue) {
+      // Set searchParams values to null
+      setSearchParameters({
+        searchHeadline: '',
+        searchBody: '',
+        combinationOfWords: '',
+        anyOfWords: '',
+        exactPhrase: '',
+        ignoreThis: '',
+        journalist: ''
+      })
+    }
+  }
+
+  // Set searchParams values to null
+  //   setSearchParameters({
+  //     searchHeadline: '',
+  //     searchBody: '',
+  //     combinationOfWords: '',
+  //     anyOfWords: '',
+  //     exactPhrase: '',
+  //     ignoreThis: '',
+  //     journalist: ''
+  //   })
+  // }
+
   const handleSearch = () => {
-    // Implement your search logic here with the provided values
-    console.log('Search Headline:', searchHeadline)
-    console.log('Search Body:', searchBody)
-    console.log('Combination of Words:', combinationOfWords)
-    console.log('Any of Words:', anyOfWords)
-    console.log('Exact Phrase:', exactPhrase)
-    console.log('Ignore This:', ignoreThis)
-    console.log('Journalist:', journalist)
+    const searchParams = {
+      searchHeadline,
+      searchBody,
+      combinationOfWords,
+      anyOfWords,
+      exactPhrase,
+      ignoreThis,
+      journalist
+    }
+
+    // Pass the search parameters to the parent component
+    setSearchParameters(searchParams)
+
+    // Close the dialog
+    onClose()
+  }
+
+  const handleCancel = () => {
+    // Reset the form fields to null
+    resetFormFields()
 
     // Close the dialog
     onClose()
@@ -48,14 +99,14 @@ const AdvancedSearchForm = ({ open, onClose }) => {
           margin='normal'
         />
         <TextField
-          label="Combination of These Words  (Use '+' sign eg. abc=xyz)"
+          label="Combination of These Words  (Use '+' sign eg. abc+xyz)"
           fullWidth
           value={combinationOfWords}
           onChange={e => setCombinationOfWords(e.target.value)}
           margin='normal'
         />
         <TextField
-          label="Any of These Words  (Use '+' sign eg. abc=xyz)"
+          label="Any of These Words  (Use '|' sign eg. abc|xyz)"
           fullWidth
           value={anyOfWords}
           onChange={e => setAnyOfWords(e.target.value)}
@@ -84,7 +135,7 @@ const AdvancedSearchForm = ({ open, onClose }) => {
         />
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} color='primary'>
+        <Button onClick={handleCancel} color='primary'>
           Cancel
         </Button>
         <Button onClick={handleSearch} color='primary'>

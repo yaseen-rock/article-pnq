@@ -168,6 +168,25 @@ const TableSelection = () => {
   const [currentPage, setCurrentPage] = useState(1)
   const [recordsPerPage, setRecordsPerPage] = useState(10)
   const [selectedCompanyIds, setSelectedCompanyIds] = useState([])
+  const [selectedMedia, setSelectedMedia] = useState([])
+  const [selectedTag, setSelectedTag] = useState([])
+  const [selectedCities, setSelectedCities] = useState([])
+
+  const [searchParameters, setSearchParameters] = useState({
+    searchHeadline: '',
+    searchBody: '',
+    combinationOfWords: '',
+    anyOfWords: '',
+    exactPhrase: '',
+    ignoreThis: '',
+    journalist: ''
+  })
+
+  console.log(searchParameters)
+
+  //console.log()
+
+  //Redux call
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
 
@@ -193,13 +212,40 @@ const TableSelection = () => {
       const storedToken = localStorage.getItem('accessToken')
 
       if (storedToken) {
+        // Format start and end dates
+        const formatDateTime = (date, setTime, isEnd) => {
+          const isoString = date.toISOString().slice(0, 10)
+          const timeString = setTime ? (isEnd ? '23:59:59' : '12:00:00') : date.toISOString().slice(11, 19)
+
+          return `${isoString} ${timeString}`
+        }
+
+        const formattedStartDate = selectedStartDate ? formatDateTime(selectedStartDate, true, false) : null
+        const formattedEndDate = selectedEndDate ? formatDateTime(selectedEndDate, true, true) : null
+
+        console.log('Formatted Start Date:', formattedStartDate)
+        console.log('Formatted End Date:', formattedEndDate)
+
         const response = await fetchArticles({
           clientIds: clientId,
           companyIds: selectedCompanyIds,
-          fromDate: selectedStartDate,
-          toDate: selectedEndDate,
+          fromDate: formattedStartDate,
+          toDate: formattedEndDate,
           page: currentPage,
-          recordsPerPage: recordsPerPage
+          recordsPerPage: recordsPerPage,
+
+          media: selectedMedia,
+          tags: selectedTag,
+          geography: selectedCities,
+
+          // Advanced search
+          headline: searchParameters.searchHeadline,
+          body: searchParameters.searchBody,
+          journalist: searchParameters.journalist,
+          wordCombo: searchParameters.combinationOfWords,
+          anyWord: searchParameters.anyOfWords,
+          ignoreWords: searchParameters.ignoreThis,
+          phrase: searchParameters.exactPhrase
         })
 
         const totalRecords = response.totalRecords
@@ -219,7 +265,18 @@ const TableSelection = () => {
 
   useEffect(() => {
     fetchArticlesApi()
-  }, [selectedEndDate, selectedStartDate, currentPage, recordsPerPage, selectedCompanyIds, clientId])
+  }, [
+    selectedEndDate,
+    selectedStartDate,
+    currentPage,
+    recordsPerPage,
+    selectedCompanyIds,
+    clientId,
+    selectedMedia,
+    selectedTag,
+    selectedCities,
+    searchParameters
+  ])
 
   // Filter articles based on the selected date range and search query
   const filteredArticles = useMemo(() => {
@@ -352,7 +409,16 @@ const TableSelection = () => {
       <CardHeader title={<Typography variant='title-lg'>{priorityCompanyName}</Typography>} />{' '}
       {/* Use priorityCompanyName in the title */}
       {/* Top Toolbar */}
-      <ToolbarComponent selectedCompanyIds={selectedCompanyIds} setSelectedCompanyIds={setSelectedCompanyIds} />{' '}
+      <ToolbarComponent
+        selectedCompanyIds={selectedCompanyIds}
+        setSelectedCompanyIds={setSelectedCompanyIds}
+        selectedMedia={selectedMedia}
+        setSelectedMedia={setSelectedMedia}
+        selectedTag={selectedTag}
+        setSelectedTags={setSelectedTag}
+        selectedCities={selectedCities}
+        setSelectedCities={setSelectedCities}
+      />{' '}
       {/* Toolbar with Date Filter */}
       <ArticleListToolbar
         setSearchQuery={setSearchQuery}
@@ -372,6 +438,7 @@ const TableSelection = () => {
         selectedEndDate={selectedEndDate}
         setSelectedEndDate={setSelectedEndDate}
         selectedArticles={selectedArticles}
+        setSearchParameters={setSearchParameters}
       />
       {/* DataGrid */}
       <Box p={2}>

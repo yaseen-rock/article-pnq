@@ -188,7 +188,8 @@ const ArticleListToolbar = ({
   selectedEndDate,
   setSelectedEndDate,
   primaryColor,
-  selectedArticles
+  selectedArticles,
+  setSearchParameters
 }) => {
   const isMobile = useMediaQuery(theme => theme.breakpoints.down('sm'))
 
@@ -427,27 +428,40 @@ const ArticleListToolbar = ({
           <AdvancedSearchIcon />
         </Button>
       </CustomTooltip>
-      <AdvancedSearchForm open={isAdvancedSearchOpen} onClose={handleAdvancedSearchClose} />
-      <Button onClick={handleDeleteDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <DeleteIcon />
-      </Button>
+      <AdvancedSearchForm
+        open={isAdvancedSearchOpen}
+        onClose={handleAdvancedSearchClose}
+        setSearchParameters={setSearchParameters}
+      />
+
+      <CustomTooltip title='Delete'>
+        <Button onClick={handleDeleteDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <DeleteIcon />
+        </Button>
+      </CustomTooltip>
       <DeleteDialog open={isDeleteDialogOpen} onClose={handleDeleteDialogClose} />
 
-      <Button onClick={handleEmailDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <EmailIcon />
-      </Button>
+      <CustomTooltip title='Email'>
+        <Button onClick={handleEmailDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <EmailIcon />
+        </Button>
+      </CustomTooltip>
       <EmailDialog open={isEmailDialogOpen} onClose={handleEmailDialogClose} />
 
-      <Button onClick={handleImageDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <ImageIcon />
-      </Button>
+      <CustomTooltip title='Image'>
+        <Button onClick={handleImageDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <ImageIcon />
+        </Button>
+      </CustomTooltip>
 
       {/* Add the ImageDialog component */}
       <ImageDialog open={isImageDialogOpen} handleClose={handleImageDialogClose} selectedArticles={selectedArticles} />
 
-      <Button onClick={handleDossierDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <DownloadIcon />
-      </Button>
+      <CustomTooltip title='Download'>
+        <Button onClick={handleDossierDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <DownloadIcon />
+        </Button>
+      </CustomTooltip>
 
       {/* Add the DownloadDialog component */}
       <DossierDialog
@@ -456,38 +470,51 @@ const ArticleListToolbar = ({
         selectedStartDate={selectedStartDate}
         selectedEndDate={selectedEndDate}
       />
-      <Button onClick={handleExcelDumpDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <ExcelDumpIcon />
-      </Button>
+
+      <CustomTooltip title='Excel Dump'>
+        <Button onClick={handleExcelDumpDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <ExcelDumpIcon />
+        </Button>
+      </CustomTooltip>
 
       {/* Add the ExcelDumpDialog component */}
       <ExcelDumpDialog open={excelDumpDialogOpen} handleClose={handleExcelDumpDialogClose} />
 
-      <Button onClick={handleRssFeedDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <RssFeedIcon />
-      </Button>
+      <CustomTooltip title='Rss Feed'>
+        <Button onClick={handleRssFeedDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <RssFeedIcon />
+        </Button>
+      </CustomTooltip>
       <RssFeedDialog
         open={isRssFeedDialogOpen}
         handleClose={handleRssFeedDialogClose}
         selectedArticles={selectedArticles}
       />
 
-      <Button onClick={handleTaggingDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
-        <TaggingIcon />
-      </Button>
+      <CustomTooltip title='Tagging'>
+        <Button onClick={handleTaggingDialogOpen} sx={{ color: primaryColor, mr: 0 }}>
+          <TaggingIcon />
+        </Button>
+      </CustomTooltip>
       {/* Render the TaggingDialog with the open state and onClose function */}
       <TaggingDialog open={taggingDialogOpen} onClose={handleTaggingDialogClose} />
 
-      <Button onClick={handleSortByClick} sx={{ color: primaryColor, mr: 0 }}>
-        <SortByIcon />
-      </Button>
+      <CustomTooltip title='Sort By'>
+        <Button onClick={handleSortByClick} sx={{ color: primaryColor, mr: 0 }}>
+          <SortByIcon />
+        </Button>
+      </CustomTooltip>
       <Menu anchorEl={isSortByMenuOpen} open={Boolean(isSortByMenuOpen)} onClose={handleSortByClose}>
         <MenuItem onClick={handleSortByLatest}>Sort by Latest</MenuItem>
         <MenuItem onClick={handleSortByMedia}>Sort by Media</MenuItem>
       </Menu>
-      <Button onClick={handlePublicationTypeClick} sx={{ color: primaryColor, mr: 0 }}>
-        <PublicationTypeIcon />
-      </Button>
+
+      <CustomTooltip title='Publication'>
+        <Button onClick={handlePublicationTypeClick} sx={{ color: primaryColor, mr: 0 }}>
+          <PublicationTypeIcon />
+        </Button>
+      </CustomTooltip>
+
       <Menu
         anchorEl={isPublicationTypeMenuOpen}
         open={Boolean(isPublicationTypeMenuOpen)}
@@ -497,9 +524,12 @@ const ArticleListToolbar = ({
         <MenuItem onClick={handlePublicationTypeNews}>News</MenuItem>
         <MenuItem onClick={handlePublicationTypeMagazine}>Magazine</MenuItem>
       </Menu>
-      <Button onClick={handleEditionTypeClick} sx={{ color: primaryColor, mr: 0 }}>
-        <EditionTypeIcon />
-      </Button>
+
+      <CustomTooltip title='Edition'>
+        <Button onClick={handleEditionTypeClick} sx={{ color: primaryColor, mr: 0 }}>
+          <EditionTypeIcon />
+        </Button>
+      </CustomTooltip>
       <Menu anchorEl={isEditionTypeMenuOpen} open={Boolean(isEditionTypeMenuOpen)} onClose={handleEditionTypeClose}>
         <MenuItem onClick={handleEditionTypeBD}>BD</MenuItem>
         <MenuItem onClick={handleEditionTypeBIM}>BIM</MenuItem>
@@ -509,9 +539,13 @@ const ArticleListToolbar = ({
         <MenuItem onClick={handleEditionTypeTM}>TM</MenuItem>
         <MenuItem onClick={handleEditionTypeWP}>WP</MenuItem>
       </Menu>
-      <Button onClick={openFilterPopover} sx={{ color: primaryColor, mr: 0 }}>
-        <DateRangeIcon />
-      </Button>
+
+      <CustomTooltip title='Date Range'>
+        <Button onClick={openFilterPopover} sx={{ color: primaryColor, mr: 0 }}>
+          <DateRangeIcon />
+        </Button>
+      </CustomTooltip>
+
       <Button
         onClick={handleFilter1D}
         sx={{ color: primaryColor, mr: 0 }}

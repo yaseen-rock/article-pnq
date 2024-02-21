@@ -3,17 +3,44 @@ import axios from 'axios'
 
 const base_url = process.env.NEXT_PUBLIC_BASE_URL
 
-export const fetchArticles = async ({ clientIds, companyIds, fromDate, toDate, page, recordsPerPage }) => {
+export const fetchArticles = async ({
+  clientIds,
+  companyIds,
+  fromDate,
+  toDate,
+  page,
+  recordsPerPage,
+  tags,
+  media,
+  geography,
+  headline,
+  body,
+  journalist,
+  wordCombo,
+  anyWord,
+  ignoreWords,
+  phrase
+}) => {
   try {
     const storedToken = localStorage.getItem('accessToken')
 
     const request_params = {
       clientIds,
       companyIds,
-      fromDate: fromDate?.toISOString(),
-      toDate: toDate?.toISOString(),
+      fromDate,
+      toDate,
       page,
-      recordsPerPage
+      recordsPerPage,
+      media,
+      tags,
+      geography,
+      headline,
+      body,
+      journalist,
+      wordCombo,
+      anyWord,
+      ignoreWords,
+      phrase
     }
 
     const response = await axios.get(`${base_url}/clientWisePrintArticles/`, {

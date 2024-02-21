@@ -15,7 +15,16 @@ import ListItem from '@mui/material/ListItem'
 import { useSelector } from 'react-redux' // Import useSelector from react-redux
 import { selectSelectedClient } from 'src/store/apps/user/userSlice'
 
-const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
+const ToolbarComponent = ({
+  selectedCompanyIds,
+  setSelectedCompanyIds,
+  selectedMedia,
+  setSelectedMedia,
+  selectedTag,
+  setSelectedTags,
+  selectedCities,
+  setSelectedCities
+}) => {
   const [competitionAnchor, setCompetitionAnchor] = useState(null)
   const [geographyAnchor, setGeographyAnchor] = useState(null)
   const [languageAnchor, setLanguageAnchor] = useState(null)
@@ -24,9 +33,12 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
   const [companies, setCompanies] = useState([])
   const [languages, setLanguages] = useState({})
   const [cities, setCities] = useState([])
+  const [media, setMedia] = useState([])
+  const [tags, setTags] = useState([])
 
   const [selectAllCompetitions, setSelectAllCompetitions] = useState(false)
 
+  //Redux call
   const selectedClient = useSelector(selectSelectedClient)
   const clientId = selectedClient ? selectedClient.clientId : null
 
@@ -39,6 +51,21 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
     setSelectedCompanyIds([])
   }
 
+  const handleSelectAllMedia = () => {
+    const allMediaIds = media.map(item => item.publicationGroupId)
+    setSelectedMedia(allMediaIds)
+  }
+
+  const handleSelectAllTags = () => {
+    const allTags = tags.map(item => item)
+    setSelectedTags(allTags)
+  }
+
+  const handleSelectAllCities = () => {
+    const allCityIds = cities.map(city => city.cityId)
+    setSelectedCities(allCityIds)
+  }
+
   const handleCheckboxChange = companyId => {
     setSelectedCompanyIds(prevSelected => {
       const isAlreadySelected = prevSelected.includes(companyId)
@@ -49,6 +76,48 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
       } else {
         // If not selected, add to the list
         return [...prevSelected, companyId]
+      }
+    })
+  }
+
+  const handleTagSelect = item => {
+    setSelectedTags(prevSelected => {
+      const isAlreadySelected = prevSelected.includes(item)
+
+      if (isAlreadySelected) {
+        // If already selected, remove from the list
+        return prevSelected.filter(id => id !== item)
+      } else {
+        // If not selected, add to the list
+        return [...prevSelected, item]
+      }
+    })
+  }
+
+  const handleMediaSelect = publicationGroupId => {
+    setSelectedMedia(prevSelected => {
+      const isAlreadySelected = prevSelected.includes(publicationGroupId)
+
+      if (isAlreadySelected) {
+        // If already selected, remove from the list
+        return prevSelected.filter(id => id !== publicationGroupId)
+      } else {
+        // If not selected, add to the list
+        return [...prevSelected, publicationGroupId]
+      }
+    })
+  }
+
+  const handleCitySelect = cityId => {
+    setSelectedCities(prevSelected => {
+      const isAlreadySelected = prevSelected.includes(cityId)
+
+      if (isAlreadySelected) {
+        // If already selected, remove from the list
+        return prevSelected.filter(id => id !== cityId)
+      } else {
+        // If not selected, add to the list
+        return [...prevSelected, cityId]
       }
     })
   }
@@ -78,6 +147,7 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
       try {
         const storedToken = localStorage.getItem('accessToken')
         if (storedToken) {
+          // Fetch companies
           const response = await axios.get('http://51.68.220.77:8001/companyListByClient/', {
             headers: {
               Authorization: `Bearer ${storedToken}`
@@ -104,6 +174,30 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
           }
         })
         setCities(citiesResponse.data.cities)
+
+        console.log()
+
+        // Fetch media
+        const mediaResponse = await axios.get('http://51.68.220.77:8001/printMediaList', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: {
+            clientId: clientId
+          }
+        })
+        setMedia(mediaResponse.data.mediaList)
+
+        // Fetch tags
+        const tagsResponse = await axios.get('http://51.68.220.77:8001/printClientCompanyTags', {
+          headers: {
+            Authorization: `Bearer ${storedToken}`
+          },
+          params: {
+            clientId: clientId
+          }
+        })
+        setTags(tagsResponse.data.clientTags)
       } catch (error) {
         console.error('Error fetching user data and companies:', error)
       }
@@ -216,14 +310,25 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
             </MenuItem>
           ))}
         </Menu>
+
         {/* Geography Dropdown Menu */}
         <Menu
           open={Boolean(geographyAnchor)}
           anchorEl={geographyAnchor}
           onClose={() => closeDropdown(setGeographyAnchor)}
         >
-          {cities.map(city => (
-            <MenuItem key={city.cityId} onClick={handleDropdownItemClick}>
+          {cities.length > 0 && (
+            <ListItem sx={{ justifyContent: 'space-between' }}>
+              <Button onClick={handleSelectAllCities}>Select All</Button>
+              <Button onClick={() => setSelectedCities([])}>Deselect All</Button>
+            </ListItem>
+          )}
+          {cities.map((city, index) => (
+            <MenuItem
+              key={`${city.cityId}-${index}`}
+              onClick={() => handleCitySelect(city.cityId)}
+              selected={selectedCities.includes(city.cityId)}
+            >
               {city.cityName}
             </MenuItem>
           ))}
@@ -239,15 +344,41 @@ const ToolbarComponent = ({ selectedCompanyIds, setSelectedCompanyIds }) => {
         </Menu>
         {/* Media Dropdown Menu */}
         <Menu open={Boolean(mediaAnchor)} anchorEl={mediaAnchor} onClose={() => closeDropdown(setMediaAnchor)}>
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
+          {media.length > 0 && (
+            <ListItem sx={{ justifyContent: 'space-between' }}>
+              <Button onClick={handleSelectAllMedia}>Select All</Button>
+              <Button onClick={() => setSelectedMedia([])}>Deselect All</Button>
+            </ListItem>
+          )}
+          {media.map((item, index) => (
+            <MenuItem
+              key={`${item.publicationGroupId}-${index}`}
+              onClick={() => handleMediaSelect(item.publicationGroupId)}
+              selected={selectedMedia.includes(item.publicationGroupId)}
+            >
+              {item.publicationName}
+            </MenuItem>
+          ))}
           {/* Add more items as needed */}
         </Menu>
-
         {/* Tags Dropdown Menu */}
+
         <Menu open={Boolean(tagsAnchor)} anchorEl={tagsAnchor} onClose={() => closeDropdown(setTagsAnchor)}>
-          <MenuItem onClick={handleDropdownItemClick}>Item 1</MenuItem>
-          <MenuItem onClick={handleDropdownItemClick}>Item 2</MenuItem>
+          {tags.length > 0 && (
+            <ListItem sx={{ justifyContent: 'space-between' }}>
+              <Button onClick={handleSelectAllTags}>Select All</Button>
+              <Button onClick={() => setSelectedTags([])}>Deselect All</Button>
+            </ListItem>
+          )}
+          {tags?.map((item, index) => (
+            <MenuItem
+              key={`${item}-${index}`}
+              onClick={() => handleTagSelect(item)}
+              selected={selectedTag.includes(item)}
+            >
+              {item}
+            </MenuItem>
+          ))}
           {/* Add more items as needed */}
         </Menu>
 
